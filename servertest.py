@@ -11,7 +11,7 @@ SQL = "{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}"
 parameter_value = "230524-0173"
 
 def getBinddes(input):
-    conn_str = f"DRIVER={{SQL}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
+    conn_str = f"DRIVER={SQL};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
 
@@ -228,4 +228,4 @@ def updateAll(ticket, desc, editable, laborDf,  tripDf, partsDf, miscDf, materia
 
 # getBinddes("microphone")
 # getPartsPrice('GILT20011 G1','GIL0001')
-# getAllPrice(parameter_value)
+getAllPrice(parameter_value)
