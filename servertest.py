@@ -10,7 +10,7 @@ password = os.environ.get("passwordGFT")
 parameter_value = "230524-0173"
 
 def getBinddes(input):
-    conn_str = f"DRIVER={{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
+    conn_str = f"DRIVER={{SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
 
@@ -22,8 +22,9 @@ def getBinddes(input):
     cursor.close()
     conn.close()
     return partNameDf
+
 def getPartsPrice(partInfoDf):
-    conn_str = f"DRIVER={{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
+    conn_str = f"DRIVER={{SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
     
@@ -37,10 +38,16 @@ def getPartsPrice(partInfoDf):
         cursor.execute(sql_query, item_num, customer_num)
         result = cursor.fetchall()
         row_dict = {
-            'ITEMNMBR': result[0][0],
-            'ITEMDESC': result[0][1],
-            'SellingPrice': result[0][2]
+            'ITEMNMBR': item_num,
+            'ITEMDESC': "no Info",
+            'SellingPrice': 0
         }
+        if result:
+            row_dict = {
+                'ITEMNMBR': result[0][0],
+                'ITEMDESC': result[0][1],
+                'SellingPrice': result[0][2]
+            }
         pricingDf = pricingDf.append(row_dict, ignore_index=True)
     
     cursor.close()
@@ -48,7 +55,7 @@ def getPartsPrice(partInfoDf):
     return pricingDf
 
 def getAllPrice(ticketN):
-    conn_str = f"DRIVER={{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
+    conn_str = f"DRIVER={{SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password};"
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
 
@@ -81,7 +88,7 @@ def getAllPrice(ticketN):
     conn.close()
     return ticketDf, LRatesDf, TRatesDf, misc_ops_df
 def getDesc(ticket):
-    conn_str = f"DRIVER={{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
+    conn_str = f"DRIVER={{SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password};"
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
     select_query = "SELECT * FROM [CF_Universal_workdescription_insert] WHERE TicketID = ?"
@@ -93,7 +100,7 @@ def getDesc(ticket):
         return "None", 1
     return dataset[0][1], dataset[0][2]
 def getAllTicket(ticket):
-    conn_str = f"DRIVER={{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
+    conn_str = f"DRIVER={{SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password};"
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
 
@@ -138,22 +145,22 @@ def getAllTicket(ticket):
     return ticketLaborDf, ticketTripDf, ticketPartsDf, ticketMiscDf, ticketMaterialsDf, ticketSubDf
 
 def updateAll(ticket, desc, editable, laborDf,  tripDf, partsDf, miscDf, materialDf, subDf):
-    conn_str = f"DRIVER={{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
+    conn_str = f"DRIVER={{SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password};"
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
     
-    if desc != "None":
-        delete_query = "DELETE FROM [CF_Universal_workdescription_insert]"
-        cursor.execute(delete_query)
-        conn.commit()
+    # if desc != "None":
+    delete_query = "DELETE FROM [CF_Universal_workdescription_insert] WHERE TicketID = ?"
+    cursor.execute(delete_query, (ticket,))
+    conn.commit()
 
-        insert_query = "INSERT INTO [CF_Universal_workdescription_insert] (TicketID, workdescription, Editable) VALUES (?, ?, ?)"
-        insert_data = [(ticket, desc, editable)]
-        cursor.executemany(insert_query, insert_data)
-        conn.commit()
+    insert_query = "INSERT INTO [CF_Universal_workdescription_insert] (TicketID, workdescription, editable) VALUES (?, ?, ?)"
+    insert_data = [(ticket, desc, editable)]
+    cursor.executemany(insert_query, insert_data)
+    conn.commit()
 
-    delete_query = "DELETE FROM [CF_Universal_labor_insert]"
-    cursor.execute(delete_query)
+    delete_query = "DELETE FROM [CF_Universal_labor_insert] WHERE TicketID = ?"
+    cursor.execute(delete_query, (ticket,))
     conn.commit()
 
     laborDf = laborDf.dropna()
@@ -164,8 +171,8 @@ def updateAll(ticket, desc, editable, laborDf,  tripDf, partsDf, miscDf, materia
         cursor.executemany(insert_query, data)
     conn.commit()
 
-    delete_query = "DELETE FROM [CF_Universal_trip_charge_insert]"
-    cursor.execute(delete_query)
+    delete_query = "DELETE FROM [CF_Universal_trip_charge_insert] WHERE TicketID = ?"
+    cursor.execute(delete_query, (ticket,))
     conn.commit()
 
     tripDf = tripDf.dropna()
@@ -176,8 +183,8 @@ def updateAll(ticket, desc, editable, laborDf,  tripDf, partsDf, miscDf, materia
         cursor.executemany(insert_query, data)
     conn.commit()
 
-    delete_query = "DELETE FROM [CF_Universal_parts_insert]"
-    cursor.execute(delete_query)
+    delete_query = "DELETE FROM [CF_Universal_parts_insert] WHERE TicketID = ?"
+    cursor.execute(delete_query, (ticket,))
     conn.commit()
     partsDf = partsDf.dropna()
     data = partsDf[["Description", "QTY", "UNIT Price", "EXTENDED"]].values.tolist()
@@ -188,8 +195,8 @@ def updateAll(ticket, desc, editable, laborDf,  tripDf, partsDf, miscDf, materia
     conn.commit()
 
     
-    # delete_query = "DELETE FROM [CF_Universal_misc_charge_insert]"
-    # cursor.execute(delete_query)
+    # delete_query = "DELETE FROM [CF_Universal_misc_charge_insert] WHERE TicketID = ?"
+    # cursor.execute(delete_query, (ticket,))
     # conn.commit()
     miscDf = miscDf.dropna()
     data = miscDf[["Description", "QTY", "UNIT Price", "EXTENDED"]].values.tolist()
@@ -199,8 +206,8 @@ def updateAll(ticket, desc, editable, laborDf,  tripDf, partsDf, miscDf, materia
         cursor.executemany(insert_query, data)
     conn.commit()
     
-    delete_query = "DELETE FROM [CF_Universal_materials_rentals_insert]"
-    cursor.execute(delete_query)
+    delete_query = "DELETE FROM [CF_Universal_materials_rentals_insert] WHERE TicketID = ?"
+    cursor.execute(delete_query, (ticket,))
     conn.commit()
     materialDf = materialDf.dropna()
     data = materialDf[["Description", "QTY", "UNIT Price", "EXTENDED"]].values.tolist()
@@ -210,8 +217,8 @@ def updateAll(ticket, desc, editable, laborDf,  tripDf, partsDf, miscDf, materia
         cursor.executemany(insert_query, data)
     conn.commit()
     
-    delete_query = "DELETE FROM [CF_Universal_subcontractor_insert]"
-    cursor.execute(delete_query)
+    delete_query = "DELETE FROM [CF_Universal_subcontractor_insert] WHERE TicketID = ?"
+    cursor.execute(delete_query, (ticket,))
     conn.commit()
     subDf = subDf.dropna()
     data = subDf[["Description", "QTY", "UNIT Price", "EXTENDED"]].values.tolist()
@@ -226,4 +233,5 @@ def updateAll(ticket, desc, editable, laborDf,  tripDf, partsDf, miscDf, materia
 
 # getBinddes("microphone")
 # getPartsPrice('GILT20011 G1','GIL0001')
-getAllPrice(parameter_value)
+
+# getPartsPrice(partInfoDf)
