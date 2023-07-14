@@ -64,17 +64,8 @@ def mainPage():
        [data-testid="stSidebar"][aria-expanded="true"]{
            min-width: 300px;
            max-width: 300px;
-       }
-       """,
-        unsafe_allow_html=True,
-    )   
-    st.session_state.ticketN = st.sidebar.text_input("Enter ticket number:")
-
-    # try:
-    if 'ticketN' in st.session_state and st.session_state.ticketN:
-        st.markdown(
-                """
-                <style>
+       },
+       <style>
                 .stButton button {
                     float: left;
                 }
@@ -91,9 +82,14 @@ def mainPage():
                     height: 50px;
                 }
                 </style>
-                """,
-                unsafe_allow_html=True
-            )
+       """,
+        unsafe_allow_html=True,
+    )   
+    refresh_button = st.sidebar.button("Refresh")
+    st.session_state.ticketN = st.sidebar.text_input("Enter ticket number:")
+
+    # try:
+    if 'ticketN' in st.session_state and st.session_state.ticketN:
         col1, col2 = st.sidebar.columns(2)
         with col1:
             if st.button("Edit", key="1"):
@@ -103,7 +99,7 @@ def mainPage():
                 st.session_state.edit = False
         
         col1, col2 = st.columns((2,1))
-        if st.session_state.ticketDf is None:
+        if refresh_button or st.session_state.ticketDf is None:
             st.session_state.ticketDf, st.session_state.LRatesDf, st.session_state.TRatesDf, st.session_state.misc_ops_df= getAllPrice(st.session_state.ticketN)
             st.session_state.workDescription, st.session_state.editable = getDesc(ticket=st.session_state.ticketN)
             st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df = getAllTicket(ticket=st.session_state.ticketN)
@@ -216,11 +212,13 @@ def mainPage():
                 with st.expander(f"******{category}******", expanded=True):
                     st.title(category)
                     if category == 'Parts':
+                        prev_input_letters = ""
                         input_letters = st.text_input("Please enter Part#/short Description of Part:", max_chars=15).upper()
-                        if len(input_letters) > 0:
+                        if input_letters != prev_input_letters and len(input_letters) > 0:
                             st.session_state.pricingDf = getBinddes(input_letters)
+                            prev_input_letters = input_letters
                     width = 800
-                    inwidth = 650
+                    inwidth = 500
                     with st.form(key=f'{category}_form'):
                         if category == 'Labor':
                             string_values = [" : "+str(value).rstrip('0').rstrip('.') for value in st.session_state.LRatesDf['Billing_Amount']]
@@ -382,24 +380,72 @@ def mainPage():
                                     num_rows="dynamic",
                                     key=category
                                 )
-                                col1, col2 = st.columns([3,1])
-                                submit_button = col2.form_submit_button(label='Submit')
-                                if not st.session_state.parts_df.empty:
-                                    if submit_button:
-                                        qty_values = st.session_state.parts_df['QTY']
-                                        descriptions = st.session_state.parts_df['Description']
-                                        filtered_descriptions['bindDes'] = st.session_state.parts_df['Description']
-                                        chosen_descriptions = filtered_descriptions[['bindDes', 'ITEMNMBR']].copy()
-                                        chosen_descriptions = chosen_descriptions.dropna(subset=['bindDes'])
-                                        chosen_descriptions['Bill_Customer_Number'] = st.session_state.ticketDf['Bill_Customer_Number'].iloc[0]
-                                        partsPriceDf = getPartsPrice(chosen_descriptions)
-                                        selling_prices = partsPriceDf['SellingPrice'].astype(float)
-                                        extended_mask = qty_values.notnull() & descriptions.notnull() & selling_prices.notnull()
-                                        st.session_state.parts_df.loc[extended_mask, 'UNIT Price'] = selling_prices[extended_mask]
-                                        st.session_state.parts_df.loc[extended_mask, 'EXTENDED'] = np.array(qty_values[extended_mask].tolist()) * np.array(selling_prices[extended_mask].tolist())
-                                        st.experimental_rerun()
-                                category_total = st.session_state.parts_df['EXTENDED'].sum()
-                                category_totals[category] = category_total
+                            else:
+                                st.session_state.parts_df = st.data_editor(
+                                st.session_state.parts_df,
+                                column_config={
+                                    "QTY": st.column_config.NumberColumn(
+                                        "QTY",
+                                        help="Quantity",
+                                        width=inwidth/4,
+                                        min_value=0,
+                                        step=1
+                                    ),
+                                    "Description": st.column_config.SelectboxColumn(
+                                        "Description",
+                                        help="Description",
+                                        width=inwidth/4,
+                                        options=["please input something"],
+                                    ),
+                                    "UNIT Price": st.column_config.NumberColumn(
+                                        "UNIT Price",
+                                        help="Unit Price",
+                                        width=inwidth/4,
+                                        min_value=0.0,
+                                        disabled=True
+                                    ),
+                                    "EXTENDED": st.column_config.NumberColumn(
+                                        "EXTENDED",
+                                        help="Extended Amount",
+                                        width=inwidth/4,
+                                        min_value=0.0,
+                                        disabled=True
+                                    )
+                                },
+                                hide_index=True,
+                                width=width,
+                                num_rows="dynamic",
+                                key=category
+                            )
+
+                            col1, col2 = st.columns([3, 1])
+                            submit_button = col2.form_submit_button(label='Submit')
+
+                            if not st.session_state.parts_df.empty:
+                                if submit_button:
+                                    qty_values = st.session_state.parts_df['QTY']
+                                    descriptions = st.session_state.parts_df['Description']
+                                    mask = filtered_descriptions['bindDes'].isin(descriptions)
+                                    filtered_descriptions = filtered_descriptions[mask]
+                                    chosen_descriptions = filtered_descriptions[['bindDes', 'ITEMNMBR']].copy()
+                                    chosen_descriptions = chosen_descriptions.dropna(subset=['bindDes'])
+                                    chosen_descriptions['Bill_Customer_Number'] = st.session_state.ticketDf['Bill_Customer_Number'].iloc[0]
+                                    partsPriceDf = getPartsPrice(chosen_descriptions)
+                                    selling_prices = partsPriceDf['SellingPrice'].astype(float)
+
+                                    if st.session_state.parts_df['UNIT Price'].isnull().any():
+                                        first_none_index = st.session_state.parts_df['UNIT Price'].isnull().idxmax()
+                                        st.session_state.parts_df.loc[first_none_index:, 'UNIT Price'] = selling_prices.values
+                                    
+                                    if st.session_state.parts_df['EXTENDED'].isnull().any():
+                                        extended_mask = st.session_state.parts_df['EXTENDED'].isnull()
+                                        st.session_state.parts_df.loc[extended_mask, 'EXTENDED'] = st.session_state.parts_df.loc[extended_mask, 'UNIT Price'] * qty_values
+
+                                    st.experimental_rerun()
+
+
+                            category_total = st.session_state.parts_df['EXTENDED'].sum()
+                            category_totals[category] = category_total
                         elif category == 'Miscellaneous Charges':
                             string_values = [" : "+str(value).rstrip('0').rstrip('.') for value in st.session_state.misc_ops_df['Fee_Amount']]
                             concatenated_values = [description + value for description, value in zip(st.session_state.misc_ops_df['Fee_Charge_Type'], string_values)]
@@ -629,7 +675,7 @@ def mainPage():
         ${total_price:.2f}
 
         *Estimated Sales Tax*
-        ${taxRate:.1f}%
+        ${total_price*taxRate/100:.2f}
 
         *Total (including tax)*
         ${total_price_with_tax:.2f}
@@ -701,25 +747,31 @@ def mainPage():
                 row_height = 20
                 category_column_width = 577 / 6
 
-                if category == 'Labor':
-                    category_column_width = category_column_width
-                else:
-                    category_column_width = category_column_width * 6 / 4
-
                 if not first_page and y - (len(table_rows) + 4) * row_height < margin_bottom:
                     c.showPage()
                     first_page = False
                     y = 750
 
                 x = 17
+                col_width = category_column_width
                 for col_name in column_names:
-                    c.rect(x, y, category_column_width, row_height)
+                    if category != 'Labor':
+                        if col_name == 'Description':
+                            col_width = category_column_width * 3
+                        elif col_name in ['QTY', 'UNIT Price', 'EXTENDED']:
+                            col_width = category_column_width
+                    c.rect(x, y, col_width, row_height)
                     c.drawString(x + 5, y + 5, str(col_name))
-                    x += category_column_width
+                    x += col_width
                 y -= row_height
                 for row in table_rows:
                     x = 17
+                    count = 0
                     for col in row:
+                        if count == 0:
+                            col_width = category_column_width * 3
+                        else:
+                            col_width = category_column_width
                         if col is not None and isinstance(col, str):
                             match = re.match(r'^[^:\d.]+.*', col)
                             if match:
@@ -730,29 +782,28 @@ def mainPage():
                                 first_string = match.group()
                                 if category == 'Labor' or category == 'Miscellaneous Charges' or category == 'Trip Charge':
                                     first_string = re.sub(r":.*", "", first_string)
-                                if len(first_string) > 23:
-                                    first_string = first_string[:23]
-                                c.rect(x, y, category_column_width, row_height)
+                                if category == 'Labor':
+                                    col_width = category_column_width
+                                c.rect(x, y, col_width, row_height)
                                 c.drawString(x + 5, y + 5, first_string)
                         else:
-                            c.rect(x, y, category_column_width, row_height)
+                            if category == 'Labor':
+                                col_width = category_column_width
+                            c.rect(x, y, col_width, row_height)
                             c.drawString(x + 5, y + 5, str(col))
-                        x += category_column_width
+                        x += col_width
+                        count+=1
                     y -= row_height
                     if new_page_needed:
                         c.showPage()
                         first_page = False
                         new_page_needed = False
-                        y = 750
+                        y = 750                    
 
 
                 category_total = table_df['EXTENDED'].sum()
-                if category == 'Labor':
-                    c.rect(17, y, category_column_width * 6, row_height)
-                    c.drawRightString(category_column_width * 6 + 12, y + 5, f"{category} Total: {category_total}")
-                else:
-                    c.rect(17, y, category_column_width * 4, row_height)
-                    c.drawRightString(category_column_width * 4 + 12, y + 5, f"{category} Total: {category_total}")
+                c.rect(17, y, category_column_width * 6, row_height)
+                c.drawRightString(category_column_width * 6 + 12, y + 5, f"{category} Total: {category_total}")
                 y -= row_height
 
                 if y < margin_bottom:
@@ -762,14 +813,14 @@ def mainPage():
 
 
         total_price_with_tax = total_price * (1 + taxRate / 100.0)
-        c.rect(17, y, category_column_width * 4, row_height)
-        c.drawRightString(category_column_width * 4 + 12, y + 5, f"Total Price: ${total_price:.2f}")
+        c.rect(17, y, category_column_width * 6, row_height)
+        c.drawRightString(category_column_width * 6 + 12, y + 5, f"Total Price: ${total_price:.2f}")
         y -= row_height
-        c.rect(17, y, category_column_width * 4, row_height)
-        c.drawRightString(category_column_width * 4 + 12, y + 5, f"Estimated Sales Tax: {taxRate:.1f}%")
+        c.rect(17, y, category_column_width * 6, row_height)
+        c.drawRightString(category_column_width * 6 + 12, y + 5, f"Estimated Sales Tax: {total_price*taxRate/100:.2f}")
         y -= row_height
-        c.rect(17, y, category_column_width * 4, row_height)
-        c.drawRightString(category_column_width * 4 + 12, y + 5, f"Total (including tax): ${total_price_with_tax:.2f}")
+        c.rect(17, y, category_column_width * 6, row_height)
+        c.drawRightString(category_column_width * 6 + 12, y + 5, f"Total (including tax): ${total_price_with_tax:.2f}")
 
         c.save()
         buffer.seek(0)
@@ -799,6 +850,10 @@ def mainPage():
                 updateAll(st.session_state.ticketN, st.session_state.workDescription, 0, st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, 
                         st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df)
                 st.success("Successfully updated to GP!")
+                st.session_state.ticketDf, st.session_state.LRatesDf, st.session_state.TRatesDf, st.session_state.misc_ops_df= getAllPrice(st.session_state.ticketN)
+                st.session_state.workDescription, st.session_state.editable = getDesc(ticket=st.session_state.ticketN)
+                st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df = getAllTicket(ticket=st.session_state.ticketN)
+                st.experimental_rerun()
             else:
                 st.warning("Please confirm that you will not be able to edit after submission.")
     # except Exception as e:
