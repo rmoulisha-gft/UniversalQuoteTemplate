@@ -197,9 +197,9 @@ def updateAll(ticket, desc, editable, laborDf,  tripDf, partsDf, miscDf, materia
     conn.commit()
 
     
-    # delete_query = "DELETE FROM [CF_Universal_misc_charge_insert] WHERE TicketID = ?"
-    # cursor.execute(delete_query, (ticket,))
-    # conn.commit()
+    delete_query = "DELETE FROM [CF_Universal_misc_charge_insert] WHERE TicketID = ?"
+    cursor.execute(delete_query, (ticket,))
+    conn.commit()
     miscDf = miscDf.dropna()
     data = miscDf[["Description", "QTY", "UNIT Price", "EXTENDED"]].values.tolist()
     data = [row + [ticket] for row in data if all(x is not None for x in row)]
