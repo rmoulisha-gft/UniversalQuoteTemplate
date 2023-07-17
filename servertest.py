@@ -225,10 +225,10 @@ def updateAll(ticket, desc, editable, laborDf,  tripDf, partsDf, miscDf, materia
     subDf = subDf.dropna()
     data = subDf[["Description", "QTY", "UNIT Price", "EXTENDED"]].values.tolist()
     data = [row + [ticket] for row in data if all(x is not None for x in row)]
-    # insert_query = "INSERT INTO [CF_Universal_subcontractor_insert] (Description, QTY, UNIT_Price, EXTENDED, TicketID) VALUES (?,?,?,?,?)"
-    # if data:
-    #     cursor.executemany(insert_query, data)
-    # conn.commit()
+    insert_query = "INSERT INTO [CF_Universal_subcontractor_insert] (Description, QTY, UNIT_Price, EXTENDED, TicketID) VALUES (?,?,?,?,?)"
+    if data:
+        cursor.executemany(insert_query, data)
+    conn.commit()
 
     cursor.close()
     conn.close()
