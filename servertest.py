@@ -7,12 +7,11 @@ server = os.environ.get("serverGFT")
 database = os.environ.get("databaseGFT")
 username = os.environ.get("usernameGFT")
 password = os.environ.get("passwordGFT")
-SQL_Server = "{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}"
 
 parameter_value = "230524-0173"
 
 def getBinddes(input):
-    conn_str = f"DRIVER={{SQL_Server}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
+    conn_str = f"DRIVER={{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
 
@@ -26,7 +25,7 @@ def getBinddes(input):
     return partNameDf
 
 def getPartsPrice(partInfoDf):
-    conn_str = f"DRIVER={{SQL_Server}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
+    conn_str = f"DRIVER={{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
     
@@ -57,7 +56,7 @@ def getPartsPrice(partInfoDf):
     return pricingDf
 
 def getAllPrice(ticketN):
-    conn_str = f"DRIVER={{SQL_Server}};SERVER={server};DATABASE={database};UID={username};PWD={password};"
+    conn_str = f"DRIVER={{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}};SERVER={server};DATABASE={database};UID={username};PWD={password};"
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
 
@@ -90,7 +89,7 @@ def getAllPrice(ticketN):
     conn.close()
     return ticketDf, LRatesDf, TRatesDf, misc_ops_df
 def getDesc(ticket):
-    conn_str = f"DRIVER={{SQL_Server}};SERVER={server};DATABASE={database};UID={username};PWD={password};"
+    conn_str = f"DRIVER={{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}};SERVER={server};DATABASE={database};UID={username};PWD={password};"
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
     select_query = "SELECT * FROM [CF_Universal_workdescription_insert] WHERE TicketID = ?"
@@ -102,7 +101,7 @@ def getDesc(ticket):
         return "None", 1
     return dataset[0][1], dataset[0][2]
 def getAllTicket(ticket):
-    conn_str = f"DRIVER={{SQL_Server}};SERVER={server};DATABASE={database};UID={username};PWD={password};"
+    conn_str = f"DRIVER={{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}};SERVER={server};DATABASE={database};UID={username};PWD={password};"
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
 
@@ -147,7 +146,7 @@ def getAllTicket(ticket):
     return ticketLaborDf, ticketTripDf, ticketPartsDf, ticketMiscDf, ticketMaterialsDf, ticketSubDf
 
 def updateAll(ticket, desc, editable, laborDf,  tripDf, partsDf, miscDf, materialDf, subDf):
-    conn_str = f"DRIVER={{SQL_Server}};SERVER={server};DATABASE={database};UID={username};PWD={password};"
+    conn_str = f"DRIVER={{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}};SERVER={server};DATABASE={database};UID={username};PWD={password};"
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
     
