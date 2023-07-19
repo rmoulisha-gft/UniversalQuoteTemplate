@@ -3,6 +3,7 @@ import pandas as pd
 import requests
 from PIL import Image
 import io
+import time
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from servertest import getAllPrice
@@ -40,6 +41,8 @@ if "workDescription" not in st.session_state:
     st.session_state.workDescription = None
 if "editable" not in st.session_state:
     st.session_state.editable = None
+if "refresh_button" not in st.session_state:
+    st.session_state.refresh_button = None
 
 if "labor_df" not in st.session_state:
     st.session_state.labor_df = pd.DataFrame()
@@ -85,11 +88,33 @@ def mainPage():
        """,
         unsafe_allow_html=True,
     )   
-    refresh_button = st.sidebar.button("Refresh")
+    if(not st.session_state.refresh_button):
+        st.session_state.refresh_button = st.sidebar.button("Refresh")
+    st.session_state.ticketN = ""
     st.session_state.ticketN = st.sidebar.text_input("Enter ticket number:")
-
     # try:
     if 'ticketN' in st.session_state and st.session_state.ticketN:
+        if st.session_state.refresh_button or st.session_state.ticketDf is None:
+            st.session_state.refresh_button = False
+            st.session_state.ticketDf, st.session_state.LRatesDf, st.session_state.TRatesDf, st.session_state.misc_ops_df= getAllPrice(st.session_state.ticketN)
+            st.session_state.workDescription, st.session_state.editable = getDesc(ticket=st.session_state.ticketN)
+            st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df = getAllTicket(ticket=st.session_state.ticketN)
+        
+
+        try:
+            left_data = {
+                'To': st.session_state.ticketDf['CUST_NAME'] + " " + st.session_state.ticketDf['CUST_ADDRESS1'] + " " +
+                    st.session_state.ticketDf['CUST_ADDRESS2'] + " " + st.session_state.ticketDf['CUST_ADDRESS3'] + " " +
+                    st.session_state.ticketDf['CUST_CITY'] + " " + st.session_state.ticketDf['CUST_Zip'],
+                'ATTN': ['ATTN']
+            }
+        except (Exception, KeyError) as e:
+            st.error("Please enter a ticket number or check the ticket number again")
+            st.session_state.ticketN = ""
+            st.session_state.refresh_button = True
+            st.sidebar.empty()
+            st.experimental_rerun()            
+
         col1, col2 = st.sidebar.columns(2)
         with col1:
             if st.button("Edit", key="1"):
@@ -99,18 +124,6 @@ def mainPage():
                 st.session_state.edit = False
         
         col1, col2 = st.columns((2,1))
-        if refresh_button or st.session_state.ticketDf is None:
-            st.session_state.ticketDf, st.session_state.LRatesDf, st.session_state.TRatesDf, st.session_state.misc_ops_df= getAllPrice(st.session_state.ticketN)
-            st.session_state.workDescription, st.session_state.editable = getDesc(ticket=st.session_state.ticketN)
-            st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df = getAllTicket(ticket=st.session_state.ticketN)
-
-        left_data = {
-            'To': st.session_state.ticketDf['CUST_NAME'] + " " + st.session_state.ticketDf['CUST_ADDRESS1'] + " " +
-                st.session_state.ticketDf['CUST_ADDRESS2'] + " " + st.session_state.ticketDf['CUST_ADDRESS3'] + " " +
-                st.session_state.ticketDf['CUST_CITY'] + " " + st.session_state.ticketDf['CUST_Zip'],
-            'ATTN': ['ATTN']
-        }
-
         df_left = pd.DataFrame(left_data)
         left_table_styles = [
             {'selector': 'table', 'props': [('text-align', 'left'), ('border-collapse', 'collapse')]},
