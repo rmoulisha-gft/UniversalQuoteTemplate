@@ -911,7 +911,7 @@ def pricing():
         st.warning("no ticket Number")
 
 def main():
-    st.set_page_config(layout="wide")
+    st.set_page_config("Universal Quote Template", layout="wide")
     mainPage()
     # st.sidebar.title("Select Page")
     # hide_menu_style = """
