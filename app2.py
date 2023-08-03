@@ -99,7 +99,7 @@ def mainPage():
         if st.session_state.refresh_button or st.session_state.ticketDf is None:
             st.session_state.refresh_button = False
             st.session_state.ticketDf, st.session_state.LRatesDf, st.session_state.TRatesDf, st.session_state.misc_ops_df= getAllPrice(st.session_state.ticketN)
-            st.session_state.workDescription, st.session_state.editable, st.session_state.NTE_Quote = getDesc(ticket=st.session_state.ticketN, NTE_Quote = st.session_state.NTE_Quote)
+            st.session_state.workDescription, st.session_state.editable, st.session_state.NTE_Quote = getDesc(ticket=st.session_state.ticketN)
             st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df = getAllTicket(ticket=st.session_state.ticketN)
         
 
