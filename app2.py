@@ -39,6 +39,8 @@ if "edit" not in st.session_state:
     st.session_state.edit = None
 if "workDescription" not in st.session_state:
     st.session_state.workDescription = None
+if "NTE_Quote" not in st.session_state:
+    st.session_state.NTE_Quote = None
 if "editable" not in st.session_state:
     st.session_state.editable = None
 if "refresh_button" not in st.session_state:
@@ -97,7 +99,7 @@ def mainPage():
         if st.session_state.refresh_button or st.session_state.ticketDf is None:
             st.session_state.refresh_button = False
             st.session_state.ticketDf, st.session_state.LRatesDf, st.session_state.TRatesDf, st.session_state.misc_ops_df= getAllPrice(st.session_state.ticketN)
-            st.session_state.workDescription, st.session_state.editable = getDesc(ticket=st.session_state.ticketN)
+            st.session_state.workDescription, st.session_state.editable, st.session_state.NTE_Quote = getDesc(ticket=st.session_state.ticketN, NTE_Quote = st.session_state.NTE_Quote)
             st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df = getAllTicket(ticket=st.session_state.ticketN)
         
 
@@ -216,6 +218,7 @@ def mainPage():
                 work_description = st.text_area('***General description of work to be performed:***', value=st.session_state.workDescription, placeholder="", height=200, key='work_description')
                 if st.button("Save Work Description"):
                     st.session_state.workDescription = work_description
+            st.session_state.NTE_Quote = st.radio("Select Option:", ["NTE", "Quote"])
             col1, col2 = st.columns([1, 3])
 
             categories = ['Labor', 'Trip Charge', 'Parts', 'Miscellaneous Charges', 'Materials and Rentals', 'Subcontractor']
@@ -607,6 +610,7 @@ def mainPage():
             st.success("everything is saved")
             with st.container():
                 st.text_area('***General description of work to be performed:***', value = st.session_state.workDescription, disabled=True, height=200)
+                st.write("NTE_Quote is ", st.session_state.NTE_Quote)
             categories = ['Labor', 'Trip Charge', 'Parts', 'Miscellaneous Charges', 'Materials and Rentals', 'Subcontractor']
             
             expand_button_title = "Expand All"
@@ -716,15 +720,22 @@ def mainPage():
         text_box_width = 480
         text_box_height = 100
         general_description = st.session_state.workDescription
-        
+        NTE_QTE = st.session_state.NTE_Quote
+        NTE_QTE = "NTE_Quote is " + NTE_QTE
+
         styles = getSampleStyleSheet()
         paragraph_style = styles["Normal"]
         if general_description is not None:
             paragraph = Paragraph(general_description, paragraph_style)
         else:
             paragraph = Paragraph("Nothing has been entered", paragraph_style)
+            
         paragraph.wrapOn(c, text_box_width, text_box_height)
         paragraph.drawOn(c, 25, 460.55)
+
+        paragraph = Paragraph(NTE_QTE, paragraph_style)
+        paragraph.wrapOn(c, text_box_width, text_box_height)
+        paragraph.drawOn(c, 25, 500.55)
         block_x = 7
         block_y = 386.55
         block_width = 577
@@ -860,11 +871,11 @@ def mainPage():
 
         if st.button("Update to GP"):
             if confirmation:
-                updateAll(st.session_state.ticketN, st.session_state.workDescription, 0, st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, 
+                updateAll(st.session_state.ticketN, st.session_state.workDescription, 0, st.session_state.NTE_QTE, st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, 
                         st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df)
                 st.success("Successfully updated to GP!")
                 st.session_state.ticketDf, st.session_state.LRatesDf, st.session_state.TRatesDf, st.session_state.misc_ops_df= getAllPrice(st.session_state.ticketN)
-                st.session_state.workDescription, st.session_state.editable = getDesc(ticket=st.session_state.ticketN)
+                st.session_state.workDescription, st.session_state.editable, st.session_state.NTE_QTE = getDesc(ticket=st.session_state.ticketN, NTE_QTE=st.session_state.NTE_QTE)
                 st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df = getAllTicket(ticket=st.session_state.ticketN)
                 st.experimental_rerun()
             else:
