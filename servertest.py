@@ -10,8 +10,9 @@ password = os.environ.get("passwordGFT")
 
 parameter_value = "230524-0173"
 
+
 def getBinddes(input):
-    conn_str = f"DRIVER={{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
+    conn_str = f"DRIVER={{SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
 
@@ -25,7 +26,7 @@ def getBinddes(input):
     return partNameDf
 
 def getPartsPrice(partInfoDf):
-    conn_str = f"DRIVER={{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
+    conn_str = f"DRIVER={{SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
     
@@ -56,7 +57,7 @@ def getPartsPrice(partInfoDf):
     return pricingDf
 
 def getAllPrice(ticketN):
-    conn_str = f"DRIVER={{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
+    conn_str = f"DRIVER={{SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
 
@@ -89,7 +90,7 @@ def getAllPrice(ticketN):
     conn.close()
     return ticketDf, LRatesDf, TRatesDf, misc_ops_df
 def getDesc(ticket):
-    conn_str = f"DRIVER={{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
+    conn_str = f"DRIVER={{SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
     select_query = "SELECT * FROM [CF_Universal_workdescription_insert] WHERE TicketID = ?"
@@ -99,9 +100,9 @@ def getDesc(ticket):
     conn.close()
     if len(dataset) == 0:
         return "None", 1
-    return dataset[0][1], dataset[0][2]
+    return dataset[0][1], dataset[0][2], dataset[0][2]
 def getAllTicket(ticket):
-    conn_str = f"DRIVER={{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
+    conn_str = f"DRIVER={{SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
 
@@ -145,8 +146,8 @@ def getAllTicket(ticket):
     conn.close()
     return ticketLaborDf, ticketTripDf, ticketPartsDf, ticketMiscDf, ticketMaterialsDf, ticketSubDf
 
-def updateAll(ticket, desc, editable, laborDf,  tripDf, partsDf, miscDf, materialDf, subDf):
-    conn_str = f"DRIVER={{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
+def updateAll(ticket, desc, editable, NTE_Quote, laborDf,  tripDf, partsDf, miscDf, materialDf, subDf):
+    conn_str = f"DRIVER={{SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
     
@@ -155,8 +156,8 @@ def updateAll(ticket, desc, editable, laborDf,  tripDf, partsDf, miscDf, materia
     cursor.execute(delete_query, (ticket,))
     conn.commit()
 
-    insert_query = "INSERT INTO [CF_Universal_workdescription_insert] (TicketID, workdescription, editable) VALUES (?, ?, ?)"
-    insert_data = [(ticket, desc, editable)]
+    insert_query = "INSERT INTO [CF_Universal_workdescription_insert] (TicketID, workdescription, editable, NTE_Quote) VALUES (?, ?, ?, ?)"
+    insert_data = [(ticket, desc, editable, NTE_Quote)]
     cursor.executemany(insert_query, insert_data)
     conn.commit()
 
