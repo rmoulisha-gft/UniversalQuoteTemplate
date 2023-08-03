@@ -738,9 +738,9 @@ def mainPage():
             NTE_QTE = "NTE_Quote is not selected"
         paragraph = Paragraph(NTE_QTE, paragraph_style)
         paragraph.wrapOn(c, text_box_width, text_box_height)
-        paragraph.drawOn(c, 25, 500.55)
+        paragraph.drawOn(c, 25, 386.55)
         block_x = 7
-        block_y = 386.55
+        block_y = 356.55
         block_width = 577
         block_height = 100
         border_width = 1.5
