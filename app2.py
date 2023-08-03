@@ -720,8 +720,6 @@ def mainPage():
         text_box_width = 480
         text_box_height = 100
         general_description = st.session_state.workDescription
-        NTE_QTE = st.session_state.NTE_Quote
-        NTE_QTE = "NTE_Quote is " + NTE_QTE
 
         styles = getSampleStyleSheet()
         paragraph_style = styles["Normal"]
@@ -733,6 +731,11 @@ def mainPage():
         paragraph.wrapOn(c, text_box_width, text_box_height)
         paragraph.drawOn(c, 25, 460.55)
 
+        NTE_QTE = st.session_state.NTE_Quote
+        if NTE_QTE is not None:
+            NTE_QTE = "NTE_Quote is " + str(NTE_QTE)
+        else:
+            NTE_QTE = "NTE_Quote is not selected"
         paragraph = Paragraph(NTE_QTE, paragraph_style)
         paragraph.wrapOn(c, text_box_width, text_box_height)
         paragraph.drawOn(c, 25, 500.55)
