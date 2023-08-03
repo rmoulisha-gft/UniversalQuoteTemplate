@@ -100,7 +100,7 @@ def getDesc(ticket):
     conn.close()
     if len(dataset) == 0:
         return "None", 1, "None"
-    return dataset[0][1], dataset[0][2], dataset[0][2]
+    return dataset[0][1], dataset[0][2], dataset[0][3]
 def getAllTicket(ticket):
     conn_str = f"DRIVER={{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.2.so.1.1}};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
     conn = pyodbc.connect(conn_str)
