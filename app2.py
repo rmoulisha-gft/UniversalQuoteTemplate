@@ -20,11 +20,8 @@ from reportlab.lib import colors
 from reportlab.platypus import Paragraph
 import numpy as np
 import re
-from reportlab.graphics.renderPM import PMCanvas
+from reportlab.pdfgen import canvas
 from decimal import Decimal
-from reportlab.pdfbase.pdfmetrics import registerFont
-from reportlab.pdfbase.ttfonts import TTFont
-registerFont(TTFont('Arial','arial.ttf'))
 
 current_date = datetime.now()
 formatted_date = current_date.strftime("%m/%d/%Y")
@@ -661,7 +658,8 @@ def mainPage():
                         st.write(f"{category} Total : 0")
             
         left_column_content = """
-        *NOTE: Total (including tax) INCLUDES ESTIMATED SALES* \n*/ USE TAX*
+        *THE TOTAL PRICE IS AS FOLLOWS:*
+        *NOTE: TOTAL PRICE INCLUDES ESTIMATED SALES* \n*/ USE TAX*
         """
 
         col1, col2 = st.columns([1, 1])
@@ -690,22 +688,22 @@ def mainPage():
         total_price_with_tax = total_price * (1 + taxRate / 100.0)
 
         right_column_content = f"""
-        **Price (Pre-Tax)**
+        **Total**
         ${total_price:.2f}
 
-        **Estimated Sales Tax**
+        *Estimated Sales Tax*
         ${total_price*taxRate/100:.2f}
 
-        **Total (including tax)**
+        *Total (including tax)*
         ${total_price_with_tax:.2f}
         """
         col2.dataframe(pd.DataFrame(category_table_data, columns=["Category", "Total"]), hide_index=True)
         col2.write(right_column_content)
-
+    
         input_pdf = PdfReader(open('input.pdf', 'rb'))
         buffer = io.BytesIO()
         c = canvas.Canvas(buffer, pagesize=letter)
-        c.setFont("Arial", 9)
+        c.setFont("Helvetica", 7)
         c.drawString(25, 675.55, str(st.session_state.ticketDf['CUST_NAME'].values[0]) + " " + str(st.session_state.ticketDf['CUST_ADDRESS1'].values[0]))
         c.drawString(25, 665.55, str(st.session_state.ticketDf['CUST_ADDRESS2'].values[0]) + " " + str(st.session_state.ticketDf['CUST_ADDRESS3'].values[0]) + " " +
                     str(st.session_state.ticketDf['CUST_CITY'].values[0]) + " " + str(st.session_state.ticketDf['CUST_Zip'].values[0]))
@@ -716,18 +714,8 @@ def mainPage():
         c.drawString(70, 542, str(st.session_state.ticketDf['MailDispatch'].values[0]))
         c.drawString(310, 582, str(st.session_state.ticketN))
         c.drawString(310, 562, str(st.session_state.ticketDf['Purchase_Order'].values[0]))
-        
-        NTE_QTE = st.session_state.NTE_Quote
-        if NTE_QTE is not None:
-            NTE_QTE = "NTE/Quote#" + str(NTE_QTE)
-        else:
-            NTE_QTE = "NTE/Quote# None"
-            
-        c.setFont("Arial", 8)
-        c.drawString(444, 580.55, str(NTE_QTE))
-        c.setFont("Arial", 9)
-        c.drawString(470, 551, str(formatted_date))
-        c.setFont("Arial", 9)
+        c.drawString(510, 552, str(formatted_date))
+        c.setFont("Helvetica", 10)
 
         text_box_width = 480
         text_box_height = 100
@@ -743,8 +731,16 @@ def mainPage():
         paragraph.wrapOn(c, text_box_width, text_box_height)
         paragraph.drawOn(c, 25, 460.55)
 
+        NTE_QTE = st.session_state.NTE_Quote
+        if NTE_QTE is not None:
+            NTE_QTE = "NTE_Quote is " + str(NTE_QTE)
+        else:
+            NTE_QTE = "NTE_Quote is not selected"
+        paragraph = Paragraph(NTE_QTE, paragraph_style)
+        paragraph.wrapOn(c, text_box_width, text_box_height)
+        paragraph.drawOn(c, 25, 386.55)
         block_x = 7
-        block_y = 387.55
+        block_y = 356.55
         block_width = 577
         block_height = 100
         border_width = 1.5
@@ -754,7 +750,7 @@ def mainPage():
         right_block_height = block_height
         c.rect(right_block_x, right_block_y, right_block_width, right_block_height, fill=0)
         c.rect(right_block_x + border_width, right_block_y + border_width, right_block_width - 2 * border_width, right_block_height - 2 * border_width, fill=0)  # Inner border
-        c.setFont("Arial", 9)
+        c.setFont("Helvetica", 12)
         # after
         y = 386.55 - 50
         margin_bottom = 20
@@ -772,7 +768,7 @@ def mainPage():
             row_height = 20
             category_column_width = 577 / 6
 
-            if table_df.notna().any().any():
+            if not table_df.empty:
                 table_rows = table_df.to_records(index=False)
                 column_names = table_df.columns
                 row_height = 20
@@ -792,7 +788,6 @@ def mainPage():
                         elif col_name in ['QTY', 'UNIT Price', 'EXTENDED']:
                             col_width = category_column_width
                     c.rect(x, y, col_width, row_height)
-                    c.setFont("Arial", 9)
                     c.drawString(x + 5, y + 5, str(col_name))
                     x += col_width
                 y -= row_height
@@ -817,13 +812,11 @@ def mainPage():
                                 if category == 'Labor':
                                     col_width = category_column_width
                                 c.rect(x, y, col_width, row_height)
-                                c.setFont("Arial", 9)
                                 c.drawString(x + 5, y + 5, first_string)
                         else:
                             if category == 'Labor':
                                 col_width = category_column_width
                             c.rect(x, y, col_width, row_height)
-                            c.setFont("Arial", 9)
                             c.drawString(x + 5, y + 5, str(col))
                         x += col_width
                         count+=1
@@ -848,7 +841,7 @@ def mainPage():
 
         total_price_with_tax = total_price * (1 + taxRate / 100.0)
         c.rect(17, y, category_column_width * 6, row_height)
-        c.drawRightString(category_column_width * 6 + 12, y + 5, f"Price (Pre-Tax): ${total_price:.2f}")
+        c.drawRightString(category_column_width * 6 + 12, y + 5, f"Total Price: ${total_price:.2f}")
         y -= row_height
         c.rect(17, y, category_column_width * 6, row_height)
         c.drawRightString(category_column_width * 6 + 12, y + 5, f"Estimated Sales Tax: {total_price*taxRate/100:.2f}")
