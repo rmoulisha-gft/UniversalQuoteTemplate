@@ -24,7 +24,7 @@ from reportlab.graphics.renderPM import PMCanvas
 from decimal import Decimal
 from reportlab.pdfbase.pdfmetrics import registerFont
 from reportlab.pdfbase.ttfonts import TTFont
-registerFont(TTFont('Arial','ARIAL.ttf'))
+registerFont(TTFont('Arial','arial.ttf'))
 
 current_date = datetime.now()
 formatted_date = current_date.strftime("%m/%d/%Y")
