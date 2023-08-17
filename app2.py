@@ -64,7 +64,7 @@ def mainPage():
     image_height = 200
     resized_image = image.resize((int(image_height * image.width / image.height), image_height))
 
-    st.subheader("Main Page")
+    st.subheader("Universal Quote Template")
     st.write("Welcome to the main page of the Fee Charge Types application.")
     st.markdown(
         """
