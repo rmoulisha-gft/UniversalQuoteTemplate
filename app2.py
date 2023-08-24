@@ -61,7 +61,7 @@ def mainPage():
     image = Image.open("Header.jpg")
     image_height = 200
     resized_image = image.resize((int(image_height * image.width / image.height), image_height))
-    st.image(resized_image, use_column_width=True)
+    # st.image(resized_image, use_column_width=True)
 
     st.subheader("Universal Quote Template")
     st.write("Welcome to the main page of the Fee Charge Types application.")
