@@ -59,9 +59,9 @@ if "labor_df" not in st.session_state:
 
 def mainPage():
     image = Image.open("Header.jpg")
-    st.image(image, use_column_width=True)
     image_height = 200
     resized_image = image.resize((int(image_height * image.width / image.height), image_height))
+    st.image(image, use_column_width=True)
 
     st.subheader("Universal Quote Template")
     st.write("Welcome to the main page of the Fee Charge Types application.")
