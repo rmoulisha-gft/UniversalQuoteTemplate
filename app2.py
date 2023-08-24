@@ -58,9 +58,8 @@ if "labor_df" not in st.session_state:
     st.session_state.subcontractor_df = pd.DataFrame()
 
 def mainPage():
-    header_image_url = "https://github.com/Charlieletscode/GuardianFueltech-Visualization-Board-Admin/blob/main/Header.jpg?raw=true"
-    response = requests.get(header_image_url)
-    image = Image.open(io.BytesIO(response.content))
+    image = Image.open("Header.jpg")
+    col2.image(image, use_column_width=True)
     image_height = 200
     resized_image = image.resize((int(image_height * image.width / image.height), image_height))
 
