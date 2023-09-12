@@ -89,7 +89,6 @@ def getAllPrice(ticketN):
     cursor.close()
     conn.close()
     return ticketDf, LRatesDf, TRatesDf, misc_ops_df
-
 def getDesc(ticket):
     conn_str = f"DRIVER={SQLaddress};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
     conn = pyodbc.connect(conn_str)
@@ -102,7 +101,6 @@ def getDesc(ticket):
     data = [list(row) for row in dataset]
     workDes = pd.DataFrame(data, columns=["Incurred", "Proposed"])
     return workDes
-
 def getAllTicket(ticket):
     conn_str = f"DRIVER={SQLaddress};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
     conn = pyodbc.connect(conn_str)
@@ -166,9 +164,9 @@ def updateAll(ticket, incurred, proposed, laborDf,  tripDf, partsDf, miscDf, mat
     conn.commit()
 
     laborDf = laborDf.dropna()
-    data = laborDf[["Description", "Nums of Techs", "Hours per Tech", "QTY", "Hourly Rate", "EXTENDED"]].values.tolist()
+    data = laborDf[["Incurred/Proposed","Description", "Nums of Techs", "Hours per Tech", "QTY", "Hourly Rate", "EXTENDED"]].values.tolist()
     data = [row + [ticket] for row in data]
-    insert_query = "INSERT INTO [CF_Universal_labor_insert] (Description, Nums_of_Techs, Hours_per_Tech, QTY, Hourly_Rate, EXTENDED, TicketID) VALUES (?,?,?,?,?,?,?)"
+    insert_query = "INSERT INTO [CF_Universal_labor_insert] (Incurred/Proposed, Description, Nums_of_Techs, Hours_per_Tech, QTY, Hourly_Rate, EXTENDED, TicketID) VALUES (?,?,?,?,?,?,?)"
     if data:
         cursor.executemany(insert_query, data)
     conn.commit()
@@ -178,9 +176,9 @@ def updateAll(ticket, incurred, proposed, laborDf,  tripDf, partsDf, miscDf, mat
     conn.commit()
 
     tripDf = tripDf.dropna()
-    data = tripDf[["Description", "QTY", "UNIT Price", "EXTENDED"]].values.tolist()
+    data = tripDf[["Incurred/Proposed","Description", "QTY", "UNIT Price", "EXTENDED"]].values.tolist()
     data = [row + [ticket] for row in data]
-    insert_query = "INSERT INTO [CF_Universal_trip_charge_insert] (Description, QTY, UNIT_Price, EXTENDED, TicketID) VALUES (?,?,?,?,?)"
+    insert_query = "INSERT INTO [CF_Universal_trip_charge_insert] (Incurred/Proposed, Description, QTY, UNIT_Price, EXTENDED, TicketID) VALUES (?,?,?,?,?)"
     if data:
         cursor.executemany(insert_query, data)
     conn.commit()
@@ -189,9 +187,9 @@ def updateAll(ticket, incurred, proposed, laborDf,  tripDf, partsDf, miscDf, mat
     cursor.execute(delete_query, (ticket,))
     conn.commit()
     partsDf = partsDf.dropna()
-    data = partsDf[["Description", "QTY", "UNIT Price", "EXTENDED"]].values.tolist()
+    data = partsDf[["Incurred/Proposed","Description", "QTY", "UNIT Price", "EXTENDED"]].values.tolist()
     data = [row + [ticket] for row in data if all(x is not None for x in row)]
-    insert_query = "INSERT INTO [CF_Universal_parts_insert] (Description, QTY, UNIT_Price, EXTENDED, TicketID) VALUES (?,?,?,?,?)"
+    insert_query = "INSERT INTO [CF_Universal_parts_insert] (Incurred/Proposed, Description, QTY, UNIT_Price, EXTENDED, TicketID) VALUES (?,?,?,?,?)"
     if data:
         cursor.executemany(insert_query, data)
     conn.commit()
@@ -316,9 +314,10 @@ def getParent(branchName):
     dataset = cursor.fetchall()
     data = [list(row) for row in dataset]
     parentDf = pd.DataFrame(data, columns=["TicketID", "Status", "NTE_QUOTE", "Editable", "Insertdate", "Approvedate", "Declinedate"])
+    mapping = {1: 'QUOTE', 2: 'NTE'}
+    parentDf['NTE_QUOTE'] = parentDf['NTE_QUOTE'].replace(mapping)
     conn.close()
     return parentDf
-
 def updateParent(ticket, editable, ntequote, savetime, approved, declined, branchname):
     conn_str = f"DRIVER={SQLaddress};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
     conn = pyodbc.connect(conn_str)
