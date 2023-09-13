@@ -99,8 +99,28 @@ def mainPage():
                 st.session_state.workDesDf = workDes
             st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df = getAllTicket(ticket=st.session_state.ticketN)
         if st.sidebar.button("goBack", key="5"):
-            st.session_state.ticketN = ""
-            st.session_state.ticketDf = None
+            state_variables = [
+                "ticketN",
+                "pricingDf",
+                "ticketDf",
+                "TRatesDf",
+                "LRatesDf",
+                "misc_ops_df",
+                "edit",
+                "workDescription",
+                "NTE_Quote",
+                "editable",
+                "refresh_button",
+                "workDesDf",
+                "selected_branches",
+                "branch",
+                "parentDf",
+                "expand_collapse_state"
+            ]
+
+            for var_name in state_variables:
+                if var_name not in st.session_state:
+                    st.session_state[var_name] = None
             st.experimental_rerun()
         if len(st.session_state.ticketDf)==0:
             st.error("Please enter a ticket number or check the ticket number again")
@@ -274,14 +294,14 @@ def mainPage():
                                             "Hours per Tech",
                                             help="Hours per Tech",
                                             width=inwidth/6,
-                                            min_value=0.0,
+                                            min_value=0.00,
                                             step = 0.25
                                         ),
                                         "QTY": st.column_config.NumberColumn(
                                             "QTY",
                                             help="Quantity",
                                             width=inwidth/6,
-                                            min_value=0.0,
+                                            min_value=0.00,
                                             step = 0.25,
                                             disabled=True,
                                         ),
@@ -296,7 +316,7 @@ def mainPage():
                                             help="Extended Amount",
                                             width=inwidth/6,
                                             disabled=True,
-                                            min_value=0.0,
+                                            min_value=0.00,
                                             format="%.2f"
                                         ),
                                     },
@@ -352,14 +372,14 @@ def mainPage():
                                             "UNIT Price",
                                             help="Unit Price",
                                             width=inwidth/4,
-                                            min_value=0.0,
+                                            min_value=0.00,
                                             disabled=False
                                         ),
                                         "EXTENDED": st.column_config.NumberColumn(
                                             "EXTENDED",
                                             help="Extended Amount",
                                             width=inwidth/4,
-                                            min_value=0.0,
+                                            min_value=0.00,
                                             format="%.2f",
                                             disabled=True
                                         )
@@ -418,14 +438,14 @@ def mainPage():
                                                 "UNIT Price",
                                                 help="Unit Price",
                                                 width=inwidth/4,
-                                                min_value=0.0,
+                                                min_value=0.00,
                                                 disabled=True
                                             ),
                                             "EXTENDED": st.column_config.NumberColumn(
                                                 "EXTENDED",
                                                 help="Extended Amount",
                                                 width=inwidth/4,
-                                                min_value=0.0,
+                                                min_value=0.00,
                                                 format="%.2f",
                                                 disabled=True
                                             )
@@ -462,14 +482,14 @@ def mainPage():
                                             "UNIT Price",
                                             help="Unit Price",
                                             width=inwidth/4,
-                                            min_value=0.0,
+                                            min_value=0.00,
                                             disabled=True
                                         ),
                                         "EXTENDED": st.column_config.NumberColumn(
                                             "EXTENDED",
                                             help="Extended Amount",
                                             width=inwidth/4,
-                                            min_value=0.0,
+                                            min_value=0.00,
                                             format="%.2f",
                                             disabled=True
                                         )
@@ -514,7 +534,7 @@ def mainPage():
                                             "QTY",
                                             help="Quantity",
                                             width=inwidth/4,
-                                            min_value=0.0,
+                                            min_value=0.00,
                                             
                                         ),
                                         "Description": st.column_config.SelectboxColumn(
@@ -527,14 +547,14 @@ def mainPage():
                                             "UNIT Price",
                                             help="Unit Price",
                                             width=inwidth/4,
-                                            min_value=0.0,
+                                            min_value=0.00,
                                             disabled=True
                                         ),
                                         "EXTENDED": st.column_config.NumberColumn(
                                             "EXTENDED",
                                             help="Extended Amount",
                                             width=inwidth/4,
-                                            min_value=0.0,
+                                            min_value=0.00,
                                             format="%.2f",
                                             disabled=True
                                         )
@@ -576,13 +596,13 @@ def mainPage():
                                             "UNIT Price",
                                             help="Unit Price",
                                             width=inwidth/4,
-                                            min_value=0.0
+                                            min_value=0.00
                                         ),
                                         "EXTENDED": st.column_config.NumberColumn(
                                             "EXTENDED",
                                             help="Extended Amount",
                                             width=inwidth/4,
-                                            min_value=0.0,
+                                            min_value=0.00,
                                             format="%.2f",
                                             disabled=True
                                         )
@@ -623,13 +643,13 @@ def mainPage():
                                             "UNIT Price",
                                             help="Unit Price",
                                             width=inwidth/4,
-                                            min_value=0.0
+                                            min_value=0.00
                                         ),
                                         "EXTENDED": st.column_config.NumberColumn(
                                             "EXTENDED",
                                             help="Extended Amount",
                                             width=inwidth/4,
-                                            min_value=0.0,
+                                            min_value=0.00,
                                             format="%.2f",
                                             disabled=True
                                         )
