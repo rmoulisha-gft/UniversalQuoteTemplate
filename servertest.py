@@ -124,7 +124,7 @@ def getAllTicket(ticket):
     data = [list(row) for row in dataset]
     ticketPartsDf = pd.DataFrame(data, columns=["Incurred/Proposed", "Description", "QTY", "UNIT Price", "EXTENDED"])
 
-    select_query = "SELECT Description, QTY, CAST([UNIT_Price] AS FLOAT) AS [UNIT_Price], CAST(EXTENDED AS FLOAT) AS EXTENDED FROM [CF_Universal_misc_charge_insert] WHERE TicketID = ?"
+    select_query = "Exec CF_Univ_GetMiscCharge @TicketID = ?"
     cursor.execute(select_query, (ticket,))
     dataset = cursor.fetchall()
     data = [list(row) for row in dataset]
