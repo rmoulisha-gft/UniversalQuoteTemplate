@@ -25,7 +25,7 @@ from reportlab.lib import colors
 from reportlab.platypus import Paragraph
 import numpy as np
 import re
-import fmDash as submitQuotes
+import fmDash as submitFmQuotes
 from reportlab.graphics.renderPM import PMCanvas
 from decimal import Decimal
 from reportlab.pdfbase.pdfmetrics import registerFont
@@ -90,7 +90,6 @@ def mainPage():
             # st.session_state.refresh_button = False
             st.session_state.ticketDf, st.session_state.LRatesDf, st.session_state.TRatesDf, st.session_state.misc_ops_df= getAllPrice(st.session_state.ticketN)
             workDes = getDesc(ticket=st.session_state.ticketN)
-            
             if workDes is None or workDes.empty:
                 st.session_state.workDescription = "None"
                 st.session_state.editable = 1
@@ -154,7 +153,7 @@ def mainPage():
             st.subheader("Ticket Info")
             st.dataframe(df_info1, hide_index=True)
             st.dataframe(df_info2, hide_index=True)
-# Default
+            # Default
             if st.session_state.get("labor_df", None) is None or st.session_state.labor_df.empty:
                 labor_data = {
                     'Incurred/Proposed': [None],
@@ -276,14 +275,14 @@ def mainPage():
                                             help="Hours per Tech",
                                             width=inwidth/6,
                                             min_value=0.0,
-                                            
+                                            step = 0.25
                                         ),
                                         "QTY": st.column_config.NumberColumn(
                                             "QTY",
                                             help="Quantity",
                                             width=inwidth/6,
-                                            min_value=0,
-                                            step=0.5,
+                                            min_value=0.0,
+                                            step = 0.25,
                                             disabled=True,
                                         ),
                                         "Hourly Rate": st.column_config.NumberColumn(
@@ -500,7 +499,6 @@ def mainPage():
                                         if st.session_state.parts_df['EXTENDED'].isnull().any():
                                             extended_mask = st.session_state.parts_df['EXTENDED'].isnull()
                                             st.session_state.parts_df.loc[extended_mask, 'EXTENDED'] = st.session_state.parts_df.loc[extended_mask, 'UNIT Price'] * qty_values
-
                                         st.experimental_rerun()
 
 
@@ -700,7 +698,7 @@ def mainPage():
                     savetime = datetime.now()
                     savedate = savetime.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
                     updateParent(st.session_state.ticketN, st.session_state.editable, st.session_state.NTE_Quote, savetime, "1900-01-01 00:00:00.000",  "1900-01-01 00:00:00.000", st.session_state.ticketDf["BranchName"].get(0))
-                    print(st.session_state.labor_df)
+                    # print(st.session_state.labor_df)
                     updateAll(st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, 
                             st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df)
                     st.success("Successfully updated to database!")
@@ -719,7 +717,7 @@ def mainPage():
                     # st.experimental_rerun()
                 incol1, incol2, incol3 = st.columns([1,1,1])
                 with incol1:
-                    if st.button(str(st.session_state.NTE_Quote)+"Approv", key="3"):
+                    if st.button(str(st.session_state.NTE_Quote)+" Approve", key="3"):
                         approvetime = datetime.now()
                         approve = approvetime.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
                         st.session_state.editable = 0
@@ -727,7 +725,7 @@ def mainPage():
                         st.session_state.ticketN = ""
                         st.experimental_rerun()
                 with incol2:
-                    if st.button(str(st.session_state.NTE_Quote)+"Decline", key="4"):
+                    if st.button(str(st.session_state.NTE_Quote)+"\nDecline", key="4"):
                         declinetime = datetime.now()
                         decline = declinetime.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
                         updateParent(st.session_state.ticketN, 1, st.session_state.NTE_Quote, "1900-01-01 00:00:00.000",  "1900-01-01 00:00:00.000", decline, st.session_state.ticketDf["BranchName"].get(0))
@@ -857,6 +855,7 @@ def mainPage():
                                         col_width = category_column_width
                                 c.rect(x, y, col_width, row_height)
                                 c.setFont("Arial", 9)
+                                print(len(str(col_name)))
                                 c.drawString(x + 5, y + 5, str(col_name))
                                 x += col_width
                             y -= row_height
@@ -870,7 +869,7 @@ def mainPage():
                                     else:
                                         col_width = next_width if next_width else category_column_width
 
-                                    if col in ['Incurred', 'Proposed', 'None']:
+                                    if col in ['Incurred', 'Proposed', None]:
                                         col_width = category_column_width
                                         next_width = category_column_width * 3
                                     else:
@@ -889,7 +888,11 @@ def mainPage():
                                                 col_width = category_column_width
                                             c.rect(x, y, col_width, row_height)
                                             c.setFont("Arial", 9)
-                                            c.drawString(x + 5, y + 5, first_string)
+                                            crop = 47
+                                            if len(str(first_string)) < crop:
+                                                c.drawString(x + 5, y + 5, str(first_string))
+                                            else:
+                                                c.drawString(x + 5, y + 5, str(first_string)[:crop])
                                     else:
                                         if category == 'Labor':
                                             col_width = category_column_width
@@ -906,7 +909,7 @@ def mainPage():
                                     y = 750                    
 
 
-                            category_total = table_df['EXTENDED'].sum()
+                            category_total = np.round(table_df['EXTENDED'].sum(), 2)
                             c.rect(17, y, block_width, row_height)
                             c.drawRightString(block_width + 12, y + 5, f"{category} Total: {category_total}")
                             y -= row_height
@@ -953,12 +956,9 @@ def mainPage():
                     pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
                     pdf_display = F'<iframe src="data:application/pdf;base64,{pdf_base64}" width="800" height="950" type="application/pdf"></iframe>'
                     st.markdown(pdf_display, unsafe_allow_html=True)
-                # if(st.session_state.ticketDf['LOC_CUSTNMBR'] == "MAJ0001"):
-                if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "FMF0002"):
-                    print("submit for FMF0002")
+                if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001"):
                     if st.sidebar.button("Submit to FMDash"):
-                        print("")
-                        # submitQuotes(pdf_base64)
+                        submitFmQuotes(pdf_base64)
 
         # except Exception as e:
         #     st.error("Please enter a ticket number or check the ticket number again")
