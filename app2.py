@@ -92,13 +92,14 @@ def mainPage():
             workDes = getDesc(ticket=st.session_state.ticketN)
             if workDes is None or workDes.empty:
                 st.session_state.workDescription = "None"
-                st.session_state.editable = 1
+                st.session_state.editable = True
                 st.session_state.NTE_Quote = ""
                 st.session_state.workDesDf = pd.DataFrame({"TicketID":[st.session_state.ticketN], "Incurred":["None"], "Proposed":["None"]})
             else:
                 st.session_state.workDesDf = workDes
             st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df = getAllTicket(ticket=st.session_state.ticketN)
         if st.sidebar.button("goBack", key="5"):
+            st.session_state.ticketN = ""
             state_variables = [
                 "ticketN",
                 "pricingDf",
@@ -112,15 +113,12 @@ def mainPage():
                 "editable",
                 "refresh_button",
                 "workDesDf",
-                "selected_branches",
-                "branch",
                 "parentDf",
-                "expand_collapse_state"
             ]
-
             for var_name in state_variables:
-                if var_name not in st.session_state:
-                    st.session_state[var_name] = None
+                st.session_state[var_name] = None
+            
+            st.session_state.edit = False
             st.experimental_rerun()
         if len(st.session_state.ticketDf)==0:
             st.error("Please enter a ticket number or check the ticket number again")
@@ -232,7 +230,6 @@ def mainPage():
                 }
                 st.session_state.subcontractor_df = pd.DataFrame(subcontractor_data)
             st.write("**UNLESS SPECIFICALLY NOTED, THIS PROPOSAL IS VALID FOR 30 DAYS FROM THE DATE ABOVE**")
-            
             if st.session_state.editable and st.session_state.edit:
                 with st.expander("Work Description", expanded=True):
                     with st.container():
@@ -329,14 +326,17 @@ def mainPage():
                                 submit_button = col2.form_submit_button(label='Submit')
                                 if not st.session_state.labor_df.empty:
                                     if submit_button:
+                                        incurred = st.session_state.labor_df["Incurred/Proposed"]
+                                        incurred_mask = (incurred == "Proposed")
                                         qty_values = st.session_state.labor_df["Nums of Techs"]
                                         hours_values = st.session_state.labor_df["Hours per Tech"]
-                                        qty_mask = qty_values.notnull() & hours_values.notnull()
+                                        qty_mask = qty_values.notnull() & hours_values.notnull()&incurred_mask
+                                        # st.session_state.labor_df.loc[incurred_mask, 'QTY'] = np.array(qty_values[incurred_mask]) * np.array(hours_values[incurred_mask])
                                         st.session_state.labor_df.loc[qty_mask, 'QTY'] = np.array(qty_values[qty_mask]) * np.array(hours_values[qty_mask])
                                         description_values = st.session_state.labor_df['Description']
-                                        rate_mask = description_values.notnull()
+                                        rate_mask = description_values.notnull()&incurred_mask
                                         st.session_state.labor_df.loc[rate_mask, 'Hourly Rate'] = description_values[rate_mask].apply(lambda x: float(re.search(r'\d+', x).group()))
-                                        extended_mask = qty_mask & rate_mask
+                                        extended_mask = qty_mask & rate_mask&incurred_mask
                                         qty_values = np.array(st.session_state.labor_df.loc[qty_mask, 'QTY'], dtype=float)
                                         hourly = np.array(st.session_state.labor_df.loc[rate_mask, 'Hourly Rate'], dtype=float)
                                         rounded_extended_values = np.round(np.array(qty_values) * np.array(hourly), 2)
@@ -718,7 +718,6 @@ def mainPage():
                     savetime = datetime.now()
                     savedate = savetime.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
                     updateParent(st.session_state.ticketN, st.session_state.editable, st.session_state.NTE_Quote, savetime, "1900-01-01 00:00:00.000",  "1900-01-01 00:00:00.000", st.session_state.ticketDf["BranchName"].get(0))
-                    # print(st.session_state.labor_df)
                     updateAll(st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, 
                             st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df)
                     st.success("Successfully updated to database!")
@@ -743,6 +742,22 @@ def mainPage():
                         st.session_state.editable = 0
                         updateParent(st.session_state.ticketN, st.session_state.editable, st.session_state.NTE_Quote, "1900-01-01 00:00:00.000", approve,  "1900-01-01 00:00:00.000", st.session_state.ticketDf["BranchName"].get(0))
                         st.session_state.ticketN = ""
+                        updateAll(st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, 
+                            st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df)
+                        st.success("Successfully updated to database!")
+                        st.session_state.ticketDf, st.session_state.LRatesDf, st.session_state.TRatesDf, st.session_state.misc_ops_df= getAllPrice(st.session_state.ticketN)
+                        workDes = getDesc(ticket=st.session_state.ticketN)
+                    
+                        if workDes is None or workDes.empty:
+                            st.session_state.workDescription = "None"
+                            st.session_state.editable = 1
+                            st.session_state.NTE_Quote = ""
+                            st.session_state.workDesDf = pd.DataFrame({"TicketID":[st.session_state.ticketN], "Incurred":["None"], "Proposed":["None"]})
+                        else:
+                            st.session_state.workDesDf = workDes
+                        st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df = getAllTicket(ticket=st.session_state.ticketN)
+                        # submitQuotes(pdf_base64)
+                        # st.experimental_rerun()
                         st.experimental_rerun()
                 with incol2:
                     if st.button(str(st.session_state.NTE_Quote)+"\nDecline", key="4"):
@@ -750,6 +765,22 @@ def mainPage():
                         decline = declinetime.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
                         updateParent(st.session_state.ticketN, 1, st.session_state.NTE_Quote, "1900-01-01 00:00:00.000",  "1900-01-01 00:00:00.000", decline, st.session_state.ticketDf["BranchName"].get(0))
                         st.session_state.ticketN = ""
+                        updateAll(st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, 
+                            st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df)
+                        st.success("Successfully updated to database!")
+                        st.session_state.ticketDf, st.session_state.LRatesDf, st.session_state.TRatesDf, st.session_state.misc_ops_df= getAllPrice(st.session_state.ticketN)
+                        workDes = getDesc(ticket=st.session_state.ticketN)
+                    
+                        if workDes is None or workDes.empty:
+                            st.session_state.workDescription = "None"
+                            st.session_state.editable = 1
+                            st.session_state.NTE_Quote = ""
+                            st.session_state.workDesDf = pd.DataFrame({"TicketID":[st.session_state.ticketN], "Incurred":["None"], "Proposed":["None"]})
+                        else:
+                            st.session_state.workDesDf = workDes
+                        st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df = getAllTicket(ticket=st.session_state.ticketN)
+                        # submitQuotes(pdf_base64)
+                        # st.experimental_rerun()
                         st.experimental_rerun()
                 incol1, incol2, incol3 = st.columns([1,1,1])
             category_table_data = []
@@ -875,7 +906,6 @@ def mainPage():
                                         col_width = category_column_width
                                 c.rect(x, y, col_width, row_height)
                                 c.setFont("Arial", 9)
-                                print(len(str(col_name)))
                                 c.drawString(x + 5, y + 5, str(col_name))
                                 x += col_width
                             y -= row_height
@@ -1094,7 +1124,6 @@ def main():
     selected_branches = st.sidebar.multiselect("Select Branches", st.session_state.branch['BranchName'], key="select_branches", default=["Sanford"])
     if len(selected_branches) > 0 and selected_branches != st.session_state.selected_branches:
         st.session_state.selected_branches = selected_branches  
-
     if ('ticketN' in st.session_state and not st.session_state.ticketN):
             st.session_state.parentDf = getParent(st.session_state.selected_branches) 
             st.session_state.parentDf = st.data_editor(
@@ -1143,6 +1172,7 @@ def main():
                     "Declinedate": st.column_config.Column(
                         "Declinedate",
                         help="Decline Date",
+                        disabled=True
                     )
                     },
                     hide_index=True,
