@@ -166,7 +166,7 @@ def updateAll(ticket, incurred, proposed, laborDf,  tripDf, partsDf, miscDf, mat
     laborDf = laborDf.dropna()
     data = laborDf[["Incurred/Proposed","Description", "Nums of Techs", "Hours per Tech", "QTY", "Hourly Rate", "EXTENDED"]].values.tolist()
     data = [row + [ticket] for row in data]
-    insert_query = "INSERT INTO [CF_Universal_labor_insert] (Incurred/Proposed, Description, Nums_of_Techs, Hours_per_Tech, QTY, Hourly_Rate, EXTENDED, TicketID) VALUES (?,?,?,?,?,?,?)"
+    insert_query = "INSERT INTO [CF_Universal_labor_insert] (Incurred/Proposed, Description, Nums_of_Techs, Hours_per_Tech, QTY, Hourly_Rate, EXTENDED, TicketID) VALUES (?,?,?,?,?,?,?,?)"
     if data:
         cursor.executemany(insert_query, data)
     conn.commit()
