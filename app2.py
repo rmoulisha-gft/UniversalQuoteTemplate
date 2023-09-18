@@ -17,6 +17,7 @@ from servertest import getPartsPrice
 from servertest import getBranch
 from servertest import getParent
 from servertest import updateParent
+from servertest import getParentByTicket
 from datetime import datetime
 from reportlab.pdfgen import canvas
 from PyPDF2 import PdfReader, PdfWriter
@@ -25,7 +26,8 @@ from reportlab.lib import colors
 from reportlab.platypus import Paragraph
 import numpy as np
 import re
-import fmDash as submitFmQuotes
+import api.fmDash as submitFmQuotes
+import api.verisae as submitQuoteVerisae
 from reportlab.graphics.renderPM import PMCanvas
 from decimal import Decimal
 from reportlab.pdfbase.pdfmetrics import registerFont
@@ -53,7 +55,7 @@ if "workDescription" not in st.session_state:
 if "NTE_Quote" not in st.session_state:
     st.session_state.NTE_Quote = ""
 if "editable" not in st.session_state:
-    st.session_state.editable = 1
+    st.session_state.editable = None
 if "refresh_button" not in st.session_state:
     st.session_state.refresh_button = None
 if "workDesDf" not in st.session_state:
@@ -76,7 +78,27 @@ if "labor_df" not in st.session_state:
     st.session_state.miscellaneous_charges_df = pd.DataFrame()
     st.session_state.materials_and_rentals_df = pd.DataFrame()
     st.session_state.subcontractor_df = pd.DataFrame()
-
+def refresh():
+    st.session_state.ticketN = ""
+    state_variables = [
+        "ticketN",
+        "pricingDf",
+        "ticketDf",
+        "TRatesDf",
+        "LRatesDf",
+        "misc_ops_df",
+        "edit",
+        "workDescription",
+        "NTE_Quote",
+        "editable",
+        "refresh_button",
+        "workDesDf",
+        "parentDf",
+    ]
+    for var_name in state_variables:
+        st.session_state[var_name] = None
+    st.session_state.edit = False
+    st.experimental_rerun()
 def mainPage():
     image = Image.open("Header.jpg")
     image_height = 200
@@ -91,39 +113,26 @@ def mainPage():
             st.session_state.ticketDf, st.session_state.LRatesDf, st.session_state.TRatesDf, st.session_state.misc_ops_df= getAllPrice(st.session_state.ticketN)
             workDes = getDesc(ticket=st.session_state.ticketN)
             if workDes is None or workDes.empty:
-                st.session_state.workDescription = "None"
-                st.session_state.editable = True
-                st.session_state.NTE_Quote = ""
-                st.session_state.workDesDf = pd.DataFrame({"TicketID":[st.session_state.ticketN], "Incurred":["None"], "Proposed":["None"]})
+                st.session_state.workDescription = "Please input"
+                st.session_state.workDesDf = pd.DataFrame({"TicketID":[st.session_state.ticketN], "Incurred":[st.session_state.workDescription], "Proposed":[st.session_state.workDescription]})
             else:
                 st.session_state.workDesDf = workDes
             st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df = getAllTicket(ticket=st.session_state.ticketN)
         if st.sidebar.button("goBack", key="5"):
-            st.session_state.ticketN = ""
-            state_variables = [
-                "ticketN",
-                "pricingDf",
-                "ticketDf",
-                "TRatesDf",
-                "LRatesDf",
-                "misc_ops_df",
-                "edit",
-                "workDescription",
-                "NTE_Quote",
-                "editable",
-                "refresh_button",
-                "workDesDf",
-                "parentDf",
-            ]
-            for var_name in state_variables:
-                st.session_state[var_name] = None
-            
-            st.session_state.edit = False
-            st.experimental_rerun()
+            refresh()
         if len(st.session_state.ticketDf)==0:
             st.error("Please enter a ticket number or check the ticket number again")
             # st.session_state.refresh_button = True
         else:
+            parentDf = getParentByTicket(st.session_state.ticketN)
+            if int(parentDf["NTE_QUOTE"].get(0)) == 1:
+                st.session_state.NTE_Quote = "QUOTE"
+            else:
+                st.session_state.NTE_Quote = "NTE"
+            if parentDf["Editable"].get(0) != "":
+                st.session_state.editable = int(parentDf["Editable"])
+            else:
+                st.session_state.editable = 1
             left_data = {
                     'To': st.session_state.ticketDf['CUST_NAME'] + " " + st.session_state.ticketDf['CUST_ADDRESS1'] + " " +
                         st.session_state.ticketDf['CUST_ADDRESS2'] + " " + st.session_state.ticketDf['CUST_ADDRESS3'] + " " +
@@ -396,8 +405,10 @@ def mainPage():
                                         if pd.isnull(st.session_state.trip_charge_df['UNIT Price']).any() and not pd.isnull(st.session_state.trip_charge_df['Description']).any():
                                             st.session_state.trip_charge_df['UNIT Price'] = st.session_state.trip_charge_df['Description'].apply(lambda x: float(re.search(r'\d+', x).group()))
                                         qty_values = st.session_state.trip_charge_df['QTY']
+                                        incurred = st.session_state.labor_df["Incurred/Proposed"]
+                                        incurred_mask = (incurred == "Proposed")
                                         unit_price_values = st.session_state.trip_charge_df['UNIT Price']
-                                        extended_mask = qty_values.notnull() & unit_price_values.notnull()
+                                        extended_mask = qty_values.notnull() & unit_price_values.notnull() & incurred_mask
                                         qty_values = np.array(qty_values, dtype=float)
                                         unit_price_values = np.array(unit_price_values, dtype=float)
                                         extended_values = np.array(qty_values) * np.array(unit_price_values)
@@ -507,7 +518,9 @@ def mainPage():
                                     if submit_button:
                                         qty_values = st.session_state.parts_df['QTY']
                                         descriptions = st.session_state.parts_df['Description']
-                                        mask = filtered_descriptions['bindDes'].isin(descriptions)
+                                        incurred = st.session_state.labor_df["Incurred/Proposed"]
+                                        incurred_mask = (incurred == "Proposed")
+                                        mask = filtered_descriptions['bindDes'].isin(descriptions) & incurred_mask
                                         filtered_descriptions = filtered_descriptions[mask]
                                         chosen_descriptions = filtered_descriptions[['bindDes', 'ITEMNMBR']].copy()
                                         chosen_descriptions = chosen_descriptions.dropna(subset=['bindDes'])
@@ -717,21 +730,10 @@ def mainPage():
                 if st.button("Save"):        
                     savetime = datetime.now()
                     savedate = savetime.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-                    updateParent(st.session_state.ticketN, st.session_state.editable, st.session_state.NTE_Quote, savetime, "1900-01-01 00:00:00.000",  "1900-01-01 00:00:00.000", st.session_state.ticketDf["BranchName"].get(0))
+                    updateParent(st.session_state.ticketN, st.session_state.editable, st.session_state.NTE_Quote, savetime, "1900-01-01 00:00:00.000",  "1900-01-01 00:00:00.000", st.session_state.ticketDf["BranchName"].get(0), "save")
                     updateAll(st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, 
                             st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df)
-                    st.success("Successfully updated to database!")
-                    st.session_state.ticketDf, st.session_state.LRatesDf, st.session_state.TRatesDf, st.session_state.misc_ops_df= getAllPrice(st.session_state.ticketN)
-                    workDes = getDesc(ticket=st.session_state.ticketN)
-                
-                    if workDes is None or workDes.empty:
-                        st.session_state.workDescription = "None"
-                        st.session_state.editable = 1
-                        st.session_state.NTE_Quote = ""
-                        st.session_state.workDesDf = pd.DataFrame({"TicketID":[st.session_state.ticketN], "Incurred":["None"], "Proposed":["None"]})
-                    else:
-                        st.session_state.workDesDf = workDes
-                    st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df = getAllTicket(ticket=st.session_state.ticketN)
+                    st.success("Successfully updated to database!")                
                     # submitQuotes(pdf_base64)
                     # st.experimental_rerun()
                 incol1, incol2, incol3 = st.columns([1,1,1])
@@ -740,48 +742,20 @@ def mainPage():
                         approvetime = datetime.now()
                         approve = approvetime.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
                         st.session_state.editable = 0
-                        updateParent(st.session_state.ticketN, st.session_state.editable, st.session_state.NTE_Quote, "1900-01-01 00:00:00.000", approve,  "1900-01-01 00:00:00.000", st.session_state.ticketDf["BranchName"].get(0))
-                        st.session_state.ticketN = ""
+                        updateParent(st.session_state.ticketN, st.session_state.editable, st.session_state.NTE_Quote, "1900-01-01 00:00:00.000", approve,  "1900-01-01 00:00:00.000", st.session_state.ticketDf["BranchName"].get(0), "approve")
                         updateAll(st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, 
                             st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df)
                         st.success("Successfully updated to database!")
-                        st.session_state.ticketDf, st.session_state.LRatesDf, st.session_state.TRatesDf, st.session_state.misc_ops_df= getAllPrice(st.session_state.ticketN)
-                        workDes = getDesc(ticket=st.session_state.ticketN)
-                    
-                        if workDes is None or workDes.empty:
-                            st.session_state.workDescription = "None"
-                            st.session_state.editable = 1
-                            st.session_state.NTE_Quote = ""
-                            st.session_state.workDesDf = pd.DataFrame({"TicketID":[st.session_state.ticketN], "Incurred":["None"], "Proposed":["None"]})
-                        else:
-                            st.session_state.workDesDf = workDes
-                        st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df = getAllTicket(ticket=st.session_state.ticketN)
-                        # submitQuotes(pdf_base64)
-                        # st.experimental_rerun()
-                        st.experimental_rerun()
+                        refresh()
                 with incol2:
                     if st.button(str(st.session_state.NTE_Quote)+"\nDecline", key="4"):
                         declinetime = datetime.now()
                         decline = declinetime.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-                        updateParent(st.session_state.ticketN, 1, st.session_state.NTE_Quote, "1900-01-01 00:00:00.000",  "1900-01-01 00:00:00.000", decline, st.session_state.ticketDf["BranchName"].get(0))
-                        st.session_state.ticketN = ""
+                        updateParent(st.session_state.ticketN, 1, st.session_state.NTE_Quote, "1900-01-01 00:00:00.000",  "1900-01-01 00:00:00.000", decline, st.session_state.ticketDf["BranchName"].get(0), "decline")
                         updateAll(st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, 
                             st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df)
                         st.success("Successfully updated to database!")
-                        st.session_state.ticketDf, st.session_state.LRatesDf, st.session_state.TRatesDf, st.session_state.misc_ops_df= getAllPrice(st.session_state.ticketN)
-                        workDes = getDesc(ticket=st.session_state.ticketN)
-                    
-                        if workDes is None or workDes.empty:
-                            st.session_state.workDescription = "None"
-                            st.session_state.editable = 1
-                            st.session_state.NTE_Quote = ""
-                            st.session_state.workDesDf = pd.DataFrame({"TicketID":[st.session_state.ticketN], "Incurred":["None"], "Proposed":["None"]})
-                        else:
-                            st.session_state.workDesDf = workDes
-                        st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df = getAllTicket(ticket=st.session_state.ticketN)
-                        # submitQuotes(pdf_base64)
-                        # st.experimental_rerun()
-                        st.experimental_rerun()
+                        refresh()
                 incol1, incol2, incol3 = st.columns([1,1,1])
             category_table_data = []
             for category in categories:
@@ -1157,7 +1131,8 @@ def main():
                     "Editable": st.column_config.CheckboxColumn(
                         "Editable",
                         help="Editable",
-                        required=True
+                        required=True,
+                        disabled=True
                     ),
                     "Insertdate": st.column_config.Column(
                         "Insertdate",
