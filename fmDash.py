@@ -1,9 +1,12 @@
 import requests
 import base64
 import json
+import os
+
+token = os.environ.get("fmDashtoken")
 
 def getOpenWO(filename):
-    api_url = "https://fmdashboard-staging.herokuapp.com/api/work_orders?token=6d05c4b7-0078-4129-a925-86d609a3cfef"
+    api_url = f"https://fmdashboard-staging.herokuapp.com/api/work_orders?token={token}"
     response = requests.get(api_url)
 
     if response.status_code == 200:
@@ -18,9 +21,9 @@ def getOpenWO(filename):
     else:
         print("Failed to fetch work orders. Status code:", response.status_code)
 
-def submitQuotes(pdf_base64):
+def submitFmQuotes(pdf_base64):
     work_order_id = "118918"
-    api_url = f"https://fmdashboard-staging.herokuapp.com/api/work_orders/{work_order_id}/quotes?token=6d05c4b7-0078-4129-a925-86d609a3cfef"
+    api_url = f"https://fmdashboard-staging.herokuapp.com/api/work_orders/{work_order_id}/quotes?token={token}"
 
     # with open("input.pdf", "rb") as pdf_file:
     #     pdf_content = pdf_file.read()
