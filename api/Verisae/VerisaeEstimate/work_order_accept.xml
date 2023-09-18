@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WorkOrderActions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:noNamespaceSchemaLocation="https://wbs.verisae.com/DataNett/xsd/WorkOrderActions.xsd"
+                  updateDataBase="true">
+  <copyright>Verisae, Inc.</copyright>
+  <work_orders>
+    <work_order>
+      <work_order_number></work_order_number>
+      <wo_actions>
+        <submit_estimate>
+          <user_name></user_name>
+              <description></description>
+              <travel></travel>
+              <parts></parts>
+              <labor></labor>
+              <misc></misc>
+              <travel_tax_rate></travel_tax_rate>
+              <parts_tax_rate></parts_tax_rate>
+              <labor_tax_rate></labor_tax_rate>
+              <misc_tax_rate></misc_tax_rate>
+              <travel_second_tax_rate></travel_second_tax_rate>
+              <parts_second_tax_rate></parts_second_tax_rate>
+              <labor_second_tax_rate></labor_second_tax_rate>
+              <misc_second_tax_rate></misc_second_tax_rate>
+              <manual_tax></manual_tax>
+        </submit_estimate>
+      </wo_actions>
+    </work_order>
+  </work_orders>
+</WorkOrderActions>
+    
