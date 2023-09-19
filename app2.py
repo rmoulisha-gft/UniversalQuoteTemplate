@@ -26,8 +26,9 @@ from reportlab.lib import colors
 from reportlab.platypus import Paragraph
 import numpy as np
 import re
-import api.fmDash as submitFmQuotes
-import api.verisae as submitQuoteVerisae
+from api.fmDash import submitFmQuotes
+from api.verisae import submitQuoteVerisae
+from api.circleK import wo_cost_information
 from reportlab.graphics.renderPM import PMCanvas
 from decimal import Decimal
 from reportlab.pdfbase.pdfmetrics import registerFont
@@ -125,11 +126,11 @@ def mainPage():
             # st.session_state.refresh_button = True
         else:
             parentDf = getParentByTicket(st.session_state.ticketN)
-            if int(parentDf["NTE_QUOTE"].get(0)) == 1:
+            if parentDf["NTE_QUOTE"].get(0) is not None and int(parentDf["NTE_QUOTE"].get(0)) == 1:
                 st.session_state.NTE_Quote = "QUOTE"
             else:
                 st.session_state.NTE_Quote = "NTE"
-            if parentDf["Editable"].get(0) != "":
+            if parentDf["Editable"].get(0) is not None and parentDf["Editable"].get(0) != "":
                 st.session_state.editable = int(parentDf["Editable"])
             else:
                 st.session_state.editable = 1
@@ -980,9 +981,19 @@ def mainPage():
                     pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
                     pdf_display = F'<iframe src="data:application/pdf;base64,{pdf_base64}" width="800" height="950" type="application/pdf"></iframe>'
                     st.markdown(pdf_display, unsafe_allow_html=True)
-                if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001"):
-                    if st.sidebar.button("Submit to FMDash"):
-                        submitFmQuotes(pdf_base64)
+            #     if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001"):
+            #         if st.sidebar.button("Submit to FMDash", key = "fmDash"):
+            #             submitFmQuotes(pdf_base64)
+                
+            # if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "CIR0001"):
+            #     if st.sidebar.button("Submit to CircleK", key="circlek"):
+            #         print("here", total_price_with_tax)
+            #         wo_cost_information(category_totals["Labor"], category_totals["Trip Charge"], category_totals["Parts"], category_totals["Miscellaneous Charges"], category_totals["Materials and Rentals"], category_totals["Subcontractor"], taxRate)
+            
+            # if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MUR0001"):
+            #     if st.sidebar.button("Submit to Verisae", key = "verisae"):
+            #         submitQuoteVerisae(st.session_state.ticketDf['CUST_NAME'].get(0), st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)) + str(st.session_state.workDesDf["Proposed"].get(0)), category_totals["Trip Charge"], category_totals["Parts"], category_totals["Labor"], category_totals["Miscellaneous Charges"], taxRate)
+
 
         # except Exception as e:
         #     st.error("Please enter a ticket number or check the ticket number again")
