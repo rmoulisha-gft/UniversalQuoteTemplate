@@ -26,7 +26,7 @@ from reportlab.lib import colors
 from reportlab.platypus import Paragraph
 import numpy as np
 import re
-# from api.fmDash import submitFmQuotes
+from api.fmDash import submitFmQuotes
 # from api.verisae import submitQuoteVerisae
 # from api.circleK import wo_cost_information
 from reportlab.graphics.renderPM import PMCanvas
@@ -506,15 +506,19 @@ def mainPage():
                                 submit_button = col2.form_submit_button(label='Submit')
                                 if not newTripdf.empty:
                                     if submit_button:
-                                        description_values = newTripdf['Description']
-                                        unitMask = newTripdf['UNIT Price'].isnull()
-                                        newTripdf.loc[unitMask, 'UNIT Price'] = description_values[unitMask].apply(lambda x: float(re.search(r'\d+', x).group()))
-                                        rate_mask = description_values.notnull()
-                                        qty_mask = newTripdf['QTY'].notnull()
-                                        extended_mask = qty_mask
-                                        qty_values = np.array(newTripdf.loc[qty_mask, 'QTY'], dtype=float)
+                                        desc_mask = newTripdf['Description'].notnull()
+                                        qty_mask = newTripdf["QTY"].notnull()
+                                        qty_values = newTripdf.loc[qty_mask,"QTY"]
+                                        description_values = newTripdf.loc[desc_mask,"Description"]
+                                        incurred_mask = newTripdf['Incurred/Proposed'].notnull()
+                                        rate_mask = desc_mask & newTripdf['UNIT Price'].isnull() 
+                                        newTripdf = newTripdf[incurred_mask & qty_mask & desc_mask]
+                                        newTripdf.loc[rate_mask, 'UNIT Price'] = description_values[rate_mask].apply(lambda x: float(re.search(r'\d+', x).group()))
+                                        rate_mask = newTripdf['UNIT Price'].notnull()
+                                        extended_mask = qty_mask & rate_mask
+                                        qty_values = np.array(newTripdf.loc[rate_mask, 'QTY'], dtype=float)
                                         unitPrice = np.array(newTripdf.loc[rate_mask, 'UNIT Price'], dtype=float)
-                                        extended_values = np.round(np.array(qty_values) * np.array(unitPrice), 2)
+                                        extended_values = np.array(qty_values) * np.array(unitPrice)
                                         rounded_extended_values = np.round(extended_values, 2)
                                         newTripdf.loc[extended_mask, 'EXTENDED'] = rounded_extended_values
                                         newTripdf = newTripdf.dropna()
@@ -574,7 +578,7 @@ def mainPage():
                                 category_total = st.session_state.parts_df['EXTENDED'].sum()
                             # new
                             with st.form(key='parts_form', clear_on_submit=True):
-                                st.write("New Trip/Travel Charge")
+                                st.write("New Parts")
                                 parts_data = {
                                     'Incurred/Proposed': [None],
                                     'Description': [None],
@@ -638,19 +642,21 @@ def mainPage():
                                             help="Quantity",
                                             width=inwidth/4,
                                             min_value=0,
-                                            
+                                            disabled=True                                            
                                         ),
                                         "Description": st.column_config.SelectboxColumn(
                                             "Description",
                                             help="Description",
                                             width=inwidth/4,
                                             options=["please input something"],
+                                            disabled=True
                                         ),
                                         "Incurred/Proposed": st.column_config.SelectboxColumn(
                                             "Incurred/Proposed",
                                             help="Incurred",
                                             width=inwidth/6,
-                                            options=["Incurred", "Proposed"]
+                                            options=["Incurred", "Proposed"],
+                                            disabled=True
                                         ),
                                         "UNIT Price": st.column_config.NumberColumn(
                                             "UNIT Price",
@@ -676,9 +682,13 @@ def mainPage():
                                 col1, col2 = st.columns([3, 1])
                                 submit_button = col2.form_submit_button(label='Submit')
                                 if not newParts_df.empty:
-                                    if submit_button:
-                                        qty_values = newParts_df['QTY']
-                                        descriptions = newParts_df['Description']
+                                    if submit_button & len(input_letters) > 0:
+                                        qty_mask = newParts_df['QTY'].notnull()
+                                        desc_mask = newParts_df['Description'].notnull()
+                                        qty_values = newParts_df.loc[qty_mask, 'QTY']
+                                        descriptions = newParts_df.loc[desc_mask,'Description']
+                                        incurred_mask = newParts_df['Incurred/Proposed'].notnull()
+                                        newParts_df = newParts_df[incurred_mask & qty_mask & desc_mask]
                                         mask = filtered_descriptions['bindDes'].isin(descriptions)
                                         filtered_descriptions = filtered_descriptions[mask]
                                         chosen_descriptions = filtered_descriptions[['bindDes', 'ITEMNMBR']].copy()
@@ -686,7 +696,8 @@ def mainPage():
                                         chosen_descriptions['Bill_Customer_Number'] = st.session_state.ticketDf['Bill_Customer_Number'].iloc[0]
                                         partsPriceDf = getPartsPrice(chosen_descriptions)
                                         selling_prices = partsPriceDf['SellingPrice'].astype(float)
-                                        newParts_df['UNIT Price'] = selling_prices.values
+                                        unit_mask = newParts_df['UNIT Price'].isnull()
+                                        newParts_df.loc[unit_mask, 'UNIT Price'] = selling_prices.values
                                         if newParts_df['EXTENDED'].isnull().any():
                                             extended_mask = newParts_df['EXTENDED'].isnull()
                                             newParts_df.loc[extended_mask, 'EXTENDED'] = newParts_df.loc[extended_mask, 'UNIT Price'] * qty_values
@@ -705,7 +716,7 @@ def mainPage():
                                             "QTY",
                                             help="Quantity",
                                             width=inwidth/4,
-                                            min_value=0.00,
+                                            min_value=0.00
                                         ),
                                         "Description": st.column_config.SelectboxColumn(
                                             "Description",
@@ -725,7 +736,6 @@ def mainPage():
                                             help="Extended Amount",
                                             width=inwidth/4,
                                             min_value=0.00,
-                                            format="%.2f",
                                             disabled=True
                                         )
                                     },
@@ -738,11 +748,12 @@ def mainPage():
                                 submit_button = col2.form_submit_button(label='Submit')
                                 if not st.session_state.miscellaneous_charges_df.empty:
                                     if submit_button:
-                                        st.session_state.miscellaneous_charges_df['UNIT Price'] = st.session_state.miscellaneous_charges_df['Description'].apply(lambda x: float(re.search(r'\d+', x).group()))
                                         qty_values = st.session_state.miscellaneous_charges_df['QTY']
-                                        unit_price_values = st.session_state.miscellaneous_charges_df['UNIT Price']
-                                        extended_mask = qty_values.notnull() & unit_price_values.notnull()                                        
-                                        st.session_state.miscellaneous_charges_df.loc[extended_mask, 'EXTENDED'] = np.array(qty_values[extended_mask]) * np.array(unit_price_values[extended_mask])
+                                        unit_price_values = st.session_state.miscellaneous_charges_df['UNIT Price']   
+                                        mask = qty_values.notnull() & unit_price_values.notnull()     
+                                        st.session_state.miscellaneous_charges_df = st.session_state.miscellaneous_charges_df[mask]
+                                        st.session_state.miscellaneous_charges_df['UNIT Price'] = st.session_state.miscellaneous_charges_df['Description'].apply(lambda x: float(re.search(r'\d+', x).group()))                    
+                                        st.session_state.miscellaneous_charges_df.loc[mask, 'EXTENDED'] = np.array(qty_values[mask], dtype=float) * np.array(unit_price_values[mask], dtype=float)
                                         st.experimental_rerun()
                                     category_total = st.session_state.miscellaneous_charges_df['EXTENDED'].sum()
                                     category_totals[category] = category_total
@@ -790,6 +801,7 @@ def mainPage():
                                         qty_values = st.session_state.materials_and_rentals_df['QTY']
                                         unit_price_values = st.session_state.materials_and_rentals_df['UNIT Price']
                                         extended_mask = qty_values.notnull() & unit_price_values.notnull()
+                                        st.session_state.materials_and_rentals_df = st.session_state.materials_and_rentals_df[extended_mask]
                                         st.session_state.materials_and_rentals_df.loc[extended_mask, 'EXTENDED'] = np.array(qty_values[extended_mask]) * np.array(unit_price_values[extended_mask])
                                         st.experimental_rerun()
                                     category_total = st.session_state.materials_and_rentals_df['EXTENDED'].sum()
@@ -815,7 +827,8 @@ def mainPage():
                                             "UNIT Price",
                                             help="Unit Price",
                                             width=inwidth/4,
-                                            min_value=0.00
+                                            min_value=0.00,
+                                            step = 0.25
                                         ),
                                         "EXTENDED": st.column_config.NumberColumn(
                                             "EXTENDED",
@@ -839,6 +852,7 @@ def mainPage():
                                         unit_price_values = st.session_state.subcontractor_df['UNIT Price']
                                         extended_mask = qty_values.notnull() & unit_price_values.notnull()
                                         st.session_state.subcontractor_df.loc[extended_mask, 'EXTENDED'] = np.array(qty_values[extended_mask]) * np.array(unit_price_values[extended_mask])
+                                        st.session_state.subcontractor_df = st.session_state.subcontractor_df.dropna()
                                         st.experimental_rerun()
                                     category_total = st.session_state.subcontractor_df['EXTENDED'].sum()
                                     category_totals[category] = category_total
@@ -948,8 +962,9 @@ def mainPage():
                     buffer = io.BytesIO()
                     c = canvas.Canvas(buffer, pagesize=letter)
                     c.setFont("Arial", 9)
-                    c.drawString(25, 675.55, str(st.session_state.ticketDf['CUST_NAME'].values[0]) + " " + str(st.session_state.ticketDf['CUST_ADDRESS1'].values[0]))
-                    c.drawString(25, 665.55, str(st.session_state.ticketDf['CUST_ADDRESS2'].values[0]) + " " + str(st.session_state.ticketDf['CUST_ADDRESS3'].values[0]) + " " +
+                    c.drawString(25, 675.55, str(st.session_state.ticketDf['CUST_NAME'].values[0]))
+                    c.drawString(25, 665.55, str(st.session_state.ticketDf['CUST_ADDRESS1'].values[0]))
+                    c.drawString(25, 655.55, str(st.session_state.ticketDf['CUST_ADDRESS2'].values[0]) + " " + str(st.session_state.ticketDf['CUST_ADDRESS3'].values[0]) + " " +
                                 str(st.session_state.ticketDf['CUST_CITY'].values[0]) + " " + str(st.session_state.ticketDf['CUST_Zip'].values[0]))
                     
                     c.drawString(50, 582, str(st.session_state.ticketDf['LOC_LOCATNNM'].values[0]))
@@ -973,12 +988,27 @@ def mainPage():
 
                     text_box_width = 560
                     text_box_height = 100
-                    general_description = str(st.session_state.workDesDf["Incurred"].get(0)) + str(st.session_state.workDesDf["Proposed"].get(0))
+                    
+                    incurred_text = "Incurred Workdescription: "+str(st.session_state.workDesDf["Incurred"].get(0))
+                    proposed_text = "Proposed Workdescription: "+str(st.session_state.workDesDf["Proposed"].get(0))
+                    general_description = incurred_text + proposed_text
 
+                    if len(general_description) > 4500:
+                        if len(incurred_text) > 2500:
+                            incurred_text = str(st.session_state.workDesDf["Incurred"].get(0))[:2500] + " ... max of 2500 chars"
+                        if len(proposed_text) > 2000:
+                            proposed_text = str(st.session_state.workDesDf["Proposed"].get(0))[:2000] + " ... max of 2000 chars"
+                    
+                    general_description = (
+                        incurred_text
+                        + "<br/><br/>"
+                        + proposed_text
+                    )
+                    
                     styles = getSampleStyleSheet()
                     paragraph_style = styles["Normal"]
                     if general_description is not None:
-                        paragraph = Paragraph("Incurred Workdescription: "+str(st.session_state.workDesDf["Incurred"].get(0))+"<br/><br/>Proposed Workdescription: "+str(st.session_state.workDesDf["Proposed"].get(0)), paragraph_style)
+                        paragraph = Paragraph(general_description, paragraph_style)
                     else:
                         paragraph = Paragraph("Nothing has been entered", paragraph_style)
                         
@@ -1139,9 +1169,9 @@ def mainPage():
                     pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
                     pdf_display = F'<iframe src="data:application/pdf;base64,{pdf_base64}" width="800" height="950" type="application/pdf"></iframe>'
                     st.markdown(pdf_display, unsafe_allow_html=True)
-                # if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001"):
-                #     if st.sidebar.button("Submit to FMDash", key = "fmDash"):
-                #         submitFmQuotes(pdf_base64)
+                if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001"):
+                    if st.sidebar.button("Submit to FMDash", key = "fmDash"):
+                        submitFmQuotes(pdf_base64)
                 
             # if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "CIR0001"):
             #     if st.sidebar.button("Submit to CircleK", key="circlek"):
