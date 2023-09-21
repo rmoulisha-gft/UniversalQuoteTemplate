@@ -26,9 +26,9 @@ from reportlab.lib import colors
 from reportlab.platypus import Paragraph
 import numpy as np
 import re
-from api.fmDash import submitFmQuotes
-from api.verisae import submitQuoteVerisae
-from api.circleK import wo_cost_information
+# from api.fmDash import submitFmQuotes
+# from api.verisae import submitQuoteVerisae
+# from api.circleK import wo_cost_information
 from reportlab.graphics.renderPM import PMCanvas
 from decimal import Decimal
 from reportlab.pdfbase.pdfmetrics import registerFont
@@ -1139,9 +1139,9 @@ def mainPage():
                     pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
                     pdf_display = F'<iframe src="data:application/pdf;base64,{pdf_base64}" width="800" height="950" type="application/pdf"></iframe>'
                     st.markdown(pdf_display, unsafe_allow_html=True)
-                if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001"):
-                    if st.sidebar.button("Submit to FMDash", key = "fmDash"):
-                        submitFmQuotes(pdf_base64)
+                # if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001"):
+                #     if st.sidebar.button("Submit to FMDash", key = "fmDash"):
+                #         submitFmQuotes(pdf_base64)
                 
             # if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "CIR0001"):
             #     if st.sidebar.button("Submit to CircleK", key="circlek"):
