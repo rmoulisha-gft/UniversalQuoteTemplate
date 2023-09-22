@@ -306,15 +306,19 @@ def getParent(branchName):
     cursor = conn.cursor()
     
     select_query = '''
-        SELECT [TicketID]
-               ,[Status]
-               ,[NTE_QUOTE]
-               ,[Editable]
-               ,[Insertdate]
-               ,[Approvedate]
-               ,[Declinedate]
+       SELECT [TicketID]
+            ,[Status]
+            ,[NTE_QUOTE]
+            ,[Editable]
+            ,[Insertdate]
+            ,[Approvedate]
+            ,[Declinedate]
         FROM [GFT].[dbo].[CF_Universal_Quote_Parent]
         WHERE BranchName IN ({})
+        ORDER BY
+        COALESCE([Approvedate], [Declinedate]) DESC
+        OFFSET 0 ROWS
+        FETCH NEXT 10 ROWS ONLY;
     '''.format(', '.join(['?'] * len(branchName)))
     
     cursor.execute(select_query, branchName)
