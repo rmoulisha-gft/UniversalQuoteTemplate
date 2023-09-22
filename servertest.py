@@ -153,7 +153,7 @@ def getAllTicket(ticket):
         for column in columns_to_round:
             df[column] = pd.to_numeric(df[column]).round(2)
     return ticketLaborDf, ticketTripDf, ticketPartsDf, ticketMiscDf, ticketMaterialsDf, ticketSubDf
-getAllTicket("230215-0004")
+# getAllTicket("230215-0004")
 def updateAll(ticket, incurred, proposed, laborDf,  tripDf, partsDf, miscDf, materialDf, subDf):
     conn_str = f"DRIVER={SQLaddress};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
     conn = pyodbc.connect(conn_str)
@@ -341,7 +341,6 @@ def updateParent(ticket, editable, ntequote, savetime, approved, declined, branc
     '''
     cursor.execute(select_query, (ticket,))
     firstdata = cursor.fetchall()
-    print(firstdata)
     if button == "save":
         if not firstdata:
             insert_query = '''INSERT INTO [GFT].[dbo].[CF_Universal_Quote_Parent] (
