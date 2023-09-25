@@ -26,7 +26,7 @@ from reportlab.lib import colors
 from reportlab.platypus import Paragraph
 import numpy as np
 import re
-from api.fmDash import submitFmQuotes
+# from api.fmDash import submitFmQuotes
 # from api.verisae import submitQuoteVerisae
 # from api.circleK import wo_cost_information
 from reportlab.graphics.renderPM import PMCanvas
@@ -299,6 +299,7 @@ def mainPage():
                                             "Hourly Rate",
                                             help="Hourly Rate",
                                             width=inwidth/6,
+                                            min_value=0.00,
                                             disabled=True,
                                         ),
                                         "EXTENDED": st.column_config.NumberColumn(
@@ -361,6 +362,7 @@ def mainPage():
                                             "Hourly Rate",
                                             help="Hourly Rate",
                                             width=inwidth/6,
+                                            min_value=0.00,
                                             disabled=True,
                                         ),
                                         "EXTENDED": st.column_config.NumberColumn(
@@ -387,7 +389,7 @@ def mainPage():
                                         newLabordf.loc[qty_mask, 'QTY'] = np.array(qty_values[qty_mask]) * np.array(hours_values[qty_mask])
                                         description_values = newLabordf['Description']
                                         rate_mask = description_values.notnull()
-                                        newLabordf.loc[rate_mask, 'Hourly Rate'] = description_values[rate_mask].apply(lambda x: float(re.search(r'\d+', x).group()))
+                                        newLabordf.loc[rate_mask, 'Hourly Rate'] = description_values[rate_mask].apply(lambda x: float(re.search(r'(\d+(\.\d+)?)', x).group()))
                                         extended_mask = qty_mask & rate_mask
                                         qty_values = np.array(newLabordf.loc[qty_mask, 'QTY'], dtype=float)
                                         hourly = np.array(newLabordf.loc[rate_mask, 'Hourly Rate'], dtype=float)
@@ -513,7 +515,7 @@ def mainPage():
                                         incurred_mask = newTripdf['Incurred/Proposed'].notnull()
                                         rate_mask = desc_mask & newTripdf['UNIT Price'].isnull() 
                                         newTripdf = newTripdf[incurred_mask & qty_mask & desc_mask]
-                                        newTripdf.loc[rate_mask, 'UNIT Price'] = description_values[rate_mask].apply(lambda x: float(re.search(r'\d+', x).group()))
+                                        newTripdf.loc[rate_mask, 'UNIT Price'] = description_values[rate_mask].apply(lambda x: float(re.search(r'(\d+(\.\d+)?)', x).group()))
                                         rate_mask = newTripdf['UNIT Price'].notnull()
                                         extended_mask = qty_mask & rate_mask
                                         qty_values = np.array(newTripdf.loc[rate_mask, 'QTY'], dtype=float)
@@ -749,11 +751,11 @@ def mainPage():
                                 if not st.session_state.miscellaneous_charges_df.empty:
                                     if submit_button:
                                         qty_values = st.session_state.miscellaneous_charges_df['QTY']
-                                        unit_price_values = st.session_state.miscellaneous_charges_df['UNIT Price']   
-                                        mask = qty_values.notnull() & unit_price_values.notnull()     
-                                        st.session_state.miscellaneous_charges_df = st.session_state.miscellaneous_charges_df[mask]
-                                        st.session_state.miscellaneous_charges_df['UNIT Price'] = st.session_state.miscellaneous_charges_df['Description'].apply(lambda x: float(re.search(r'\d+', x).group()))                    
+                                        mask = qty_values.notnull() & st.session_state.miscellaneous_charges_df['Description'].notnull()
+                                        st.session_state.miscellaneous_charges_df.loc[mask, 'UNIT Price'] = st.session_state.miscellaneous_charges_df.loc[mask,'Description'].apply(lambda x: float(re.search(r'(\d+(\.\d+)?)', x).group()))
+                                        unit_price_values = st.session_state.miscellaneous_charges_df.loc[mask,'UNIT Price']
                                         st.session_state.miscellaneous_charges_df.loc[mask, 'EXTENDED'] = np.array(qty_values[mask], dtype=float) * np.array(unit_price_values[mask], dtype=float)
+                                        st.session_state.miscellaneous_charges_df = st.session_state.miscellaneous_charges_df.dropna()
                                         st.experimental_rerun()
                                     category_total = st.session_state.miscellaneous_charges_df['EXTENDED'].sum()
                                     category_totals[category] = category_total
@@ -1169,9 +1171,9 @@ def mainPage():
                     pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
                     pdf_display = F'<iframe src="data:application/pdf;base64,{pdf_base64}" width="800" height="950" type="application/pdf"></iframe>'
                     st.markdown(pdf_display, unsafe_allow_html=True)
-                if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001"):
-                    if st.sidebar.button("Submit to FMDash", key = "fmDash"):
-                        submitFmQuotes(pdf_base64)
+                # if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001"):
+                #     if st.sidebar.button("Submit to FMDash", key = "fmDash"):
+                #         submitFmQuotes(pdf_base64)
                 
             # if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "CIR0001"):
             #     if st.sidebar.button("Submit to CircleK", key="circlek"):
