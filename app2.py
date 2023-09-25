@@ -26,7 +26,7 @@ from reportlab.lib import colors
 from reportlab.platypus import Paragraph
 import numpy as np
 import re
-from api.fmDash import submitFmQuotes
+# from api.fmDash import submitFmQuotes
 # from api.verisae import submitQuoteVerisae
 # from api.circleK import wo_cost_information
 from reportlab.graphics.renderPM import PMCanvas
@@ -233,10 +233,10 @@ def mainPage():
                         st.title(category)
                         if category == 'Parts':
                             prev_input_letters = ""
-                            input_letters = st.text_input("Please enter Part#/short Description of Part:", max_chars=15).upper()
-                            if input_letters != prev_input_letters and len(input_letters) > 0:
-                                st.session_state.pricingDf = getBinddes(input_letters)
-                                prev_input_letters = input_letters
+                            st.session_state.input_letters = st.text_input("Please enter Part Id or Parts Desc:", max_chars=15).upper()
+                            if st.session_state.input_letters != prev_input_letters and len(st.session_state.input_letters) > 0:
+                                st.session_state.pricingDf = getBinddes(st.session_state.input_letters)
+                                prev_input_letters = st.session_state.input_letters
                         width = 800
                         inwidth = 500
                         if category == 'Labor':
@@ -589,8 +589,8 @@ def mainPage():
                                     'EXTENDED': [None],
                                 }
                                 newParts_df = pd.DataFrame(parts_data)
-                                if len(input_letters) > 0:
-                                    filtered_descriptions = st.session_state.pricingDf[(st.session_state.pricingDf['ITEMNMBR'] + " : " + st.session_state.pricingDf['ITEMDESC']).str.contains(input_letters)]
+                                if len(st.session_state.input_letters) > 0:
+                                    filtered_descriptions = st.session_state.pricingDf[(st.session_state.pricingDf['ITEMNMBR'] + " : " + st.session_state.pricingDf['ITEMDESC']).str.contains(st.session_state.input_letters)]
                                     filtered_descriptions['bindDes'] = filtered_descriptions['ITEMNMBR'] + " : " + filtered_descriptions['ITEMDESC']
                                     newParts_df = st.data_editor(
                                         newParts_df,
@@ -684,7 +684,7 @@ def mainPage():
                                 col1, col2 = st.columns([3, 1])
                                 submit_button = col2.form_submit_button(label='Submit')
                                 if not newParts_df.empty:
-                                    if submit_button & len(input_letters) > 0:
+                                    if submit_button and len(st.session_state.input_letters) > 0:
                                         qty_mask = newParts_df['QTY'].notnull()
                                         desc_mask = newParts_df['Description'].notnull()
                                         qty_values = newParts_df.loc[qty_mask, 'QTY']
@@ -1171,9 +1171,9 @@ def mainPage():
                     pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
                     pdf_display = F'<iframe src="data:application/pdf;base64,{pdf_base64}" width="800" height="950" type="application/pdf"></iframe>'
                     st.markdown(pdf_display, unsafe_allow_html=True)
-                if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001"):
-                    if st.sidebar.button("Submit to FMDash", key = "fmDash"):
-                        submitFmQuotes(pdf_base64)
+                # if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001"):
+                #     if st.sidebar.button("Submit to FMDash", key = "fmDash"):
+                #         submitFmQuotes(pdf_base64)
                 
             # if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "CIR0001"):
             #     if st.sidebar.button("Submit to CircleK", key="circlek"):
