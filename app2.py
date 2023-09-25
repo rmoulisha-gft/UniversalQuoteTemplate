@@ -1171,9 +1171,9 @@ def mainPage():
                     pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
                     pdf_display = F'<iframe src="data:application/pdf;base64,{pdf_base64}" width="800" height="950" type="application/pdf"></iframe>'
                     st.markdown(pdf_display, unsafe_allow_html=True)
-                # if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001"):
-                #     if st.sidebar.button("Submit to FMDash", key = "fmDash"):
-                #         submitFmQuotes(pdf_base64)
+                if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001"):
+                    if st.sidebar.button("Submit to FMDash", key = "fmDash"):
+                        submitFmQuotes(pdf_base64)
                 
             # if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "CIR0001"):
             #     if st.sidebar.button("Submit to CircleK", key="circlek"):
