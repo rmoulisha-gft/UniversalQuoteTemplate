@@ -909,6 +909,8 @@ def mainPage():
                     updateAll(st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, 
                             st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df)
                     st.success("Successfully updated to database!")                
+                    # submitQuotes(pdf_base64)
+                    # st.experimental_rerun()
                     incol1, incol2, incol3 = st.columns([1,1,1])
                     with incol1:
                         if st.button(str(st.session_state.NTE_Quote)+" Approve", key="3"):
@@ -916,13 +918,20 @@ def mainPage():
                             approve = approvetime.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
                             st.session_state.editable = 0
                             updateParent(st.session_state.ticketN, st.session_state.editable, st.session_state.NTE_Quote, "1900-01-01 00:00:00.000", approve,  "1900-01-01 00:00:00.000", st.session_state.ticketDf["BranchName"].get(0), "approve")
+                            updateAll(st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, 
+                                st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df)
+                            st.success("Successfully updated to database!")
                             refresh()
                     with incol2:
                         if st.button(str(st.session_state.NTE_Quote)+"\nDecline", key="4"):
                             declinetime = datetime.now()
                             decline = declinetime.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
                             updateParent(st.session_state.ticketN, 1, st.session_state.NTE_Quote, "1900-01-01 00:00:00.000",  "1900-01-01 00:00:00.000", decline, st.session_state.ticketDf["BranchName"].get(0), "decline")
+                            updateAll(st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, 
+                                st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df)
+                            st.success("Successfully updated to database!")
                             refresh()
+                incol1, incol2, incol3 = st.columns([1,1,1])
             category_table_data = []
             for category in categories:
                 table_df = getattr(st.session_state, f"{category.lower().replace(' ', '_')}_df")
@@ -933,6 +942,7 @@ def mainPage():
                     category_table_data.append([f"{category} Total", 0])
 
             total_price_with_tax = total_price * (1 + taxRate / 100.0)
+
             right_column_content = f"""
             **Price (Pre-Tax)**
             ${total_price:.2f}
