@@ -911,7 +911,7 @@ def mainPage():
                     updateAll(st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, 
                             st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df)
                     st.success("Successfully updated to database!")      
-                    incol1, incol2, incol3 = st.columns([1,1,1])
+                incol1, incol2, incol3 = st.columns([1,1,1])
                 with incol1:
                     if st.button(str(st.session_state.NTE_Quote)+" Approve", key="3"):
                         approvetime = datetime.now()
