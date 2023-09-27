@@ -905,7 +905,6 @@ def mainPage():
                                         format="%.2f",
                                         key="tax_rate_input")
             with col1:
-                with col1:
                 if st.button("Save"):        
                     savetime = datetime.now()
                     updateParent(st.session_state.ticketN, st.session_state.editable, st.session_state.NTE_Quote, savetime, "1900-01-01 00:00:00.000",  "1900-01-01 00:00:00.000", st.session_state.ticketDf["BranchName"].get(0), "save")
