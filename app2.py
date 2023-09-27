@@ -904,17 +904,16 @@ def mainPage():
                                         disabled=True,
                                         format="%.2f",
                                         key="tax_rate_input")
-            with col1:
-                if st.button("Save"):        
-                    savetime = datetime.now()
-                    updateParent(st.session_state.ticketN, st.session_state.editable, st.session_state.NTE_Quote, savetime, "1900-01-01 00:00:00.000",  "1900-01-01 00:00:00.000", st.session_state.ticketDf["BranchName"].get(0), "save")
-                    updateAll(st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, 
-                            st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df)
-                    st.success("Successfully updated to database!")      
-                incol1, incol2, incol3 = st.columns([1,1,1])
-                if parentDf["Status"].get(0) is not None and (parentDf["Status"].get(0) == " Approved" or parentDf["Status"].get(0) == " Processed"):
-                    st.write("Status = " + parentDf["Status"].get(0))
-                else:
+            if parentDf["Status"].get(0) is not None and (parentDf["Status"].get(0) == " Approved" or parentDf["Status"].get(0) == " Processed"):
+                st.write("Status is now" + parentDf["Status"].get(0))
+                with col1:
+                    if st.button("Save"):        
+                        savetime = datetime.now()
+                        updateParent(st.session_state.ticketN, st.session_state.editable, st.session_state.NTE_Quote, savetime, "1900-01-01 00:00:00.000",  "1900-01-01 00:00:00.000", st.session_state.ticketDf["BranchName"].get(0), "save")
+                        updateAll(st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, 
+                                st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df)
+                        st.success("Successfully updated to database!")      
+                    incol1, incol2, incol3 = st.columns([1,1,1])
                     with incol1:
                         if st.button(str(st.session_state.NTE_Quote)+" Approve", key="3"):
                             approvetime = datetime.now()
