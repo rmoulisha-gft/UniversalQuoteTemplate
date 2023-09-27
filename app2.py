@@ -906,6 +906,7 @@ def mainPage():
                                         key="tax_rate_input")
             if parentDf["Status"].get(0) is not None and (parentDf["Status"].get(0) == " Approved" or parentDf["Status"].get(0) == " Processed"):
                 st.write("Status is now" + parentDf["Status"].get(0))
+            else:
                 with col1:
                     if st.button("Save"):        
                         savetime = datetime.now()
@@ -933,7 +934,6 @@ def mainPage():
                                 st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df)
                             st.success("Successfully updated to declined!")
                             refresh()
-                incol1, incol2, incol3 = st.columns([1,1,1])
             category_table_data = []
             for category in categories:
                 table_df = getattr(st.session_state, f"{category.lower().replace(' ', '_')}_df")
@@ -957,7 +957,7 @@ def mainPage():
             """
             col2.dataframe(pd.DataFrame(category_table_data, columns=["Category", "Total"]), hide_index=True)
             col2.write(right_column_content)
-            
+            incol1, incol2, incol3 = st.columns([1,1,1])
             if incol2.button("Close PDF"):
                 incol2.text("PDF Closed")
             if(incol1.button("Open PDF")):
