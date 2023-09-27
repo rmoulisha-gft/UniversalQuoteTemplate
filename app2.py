@@ -907,7 +907,7 @@ def mainPage():
             if parentDf["Status"].get(0) is not None and (parentDf["Status"].get(0) == "Approved" or parentDf["Status"].get(0) == "Processed"):
                 with col1:
                     st.error("Status is now " + parentDf["Status"].get(0))
-                incol1, incol2, incol3 = st.columns([1,1,1])            
+                    incol1, incol2, incol3 = st.columns([1,1,1])            
             else:
                 with col1:
                     if st.button("Save"):        
