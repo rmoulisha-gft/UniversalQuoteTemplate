@@ -905,6 +905,7 @@ def mainPage():
                                         format="%.2f",
                                         key="tax_rate_input")
             with col1:
+                with col1:
                 if st.button("Save"):        
                     savetime = datetime.now()
                     updateParent(st.session_state.ticketN, st.session_state.editable, st.session_state.NTE_Quote, savetime, "1900-01-01 00:00:00.000",  "1900-01-01 00:00:00.000", st.session_state.ticketDf["BranchName"].get(0), "save")
@@ -912,21 +913,25 @@ def mainPage():
                             st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df)
                     st.success("Successfully updated to database!")      
                     incol1, incol2, incol3 = st.columns([1,1,1])
-                    with incol1:
-                        if st.button(str(st.session_state.NTE_Quote)+" Approve", key="3"):
-                            approvetime = datetime.now()
-                            approve = approvetime.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-                            st.session_state.editable = 0
-                            updateParent(st.session_state.ticketN, st.session_state.editable, st.session_state.NTE_Quote, "1900-01-01 00:00:00.000", approve,  "1900-01-01 00:00:00.000", st.session_state.ticketDf["BranchName"].get(0), "approve")
-                            st.success("Successfully updated to Gp!")
-                            refresh()
-                    with incol2:
-                        if st.button(str(st.session_state.NTE_Quote)+"\nDecline", key="4"):
-                            declinetime = datetime.now()
-                            decline = declinetime.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-                            updateParent(st.session_state.ticketN, 1, st.session_state.NTE_Quote, "1900-01-01 00:00:00.000",  "1900-01-01 00:00:00.000", decline, st.session_state.ticketDf["BranchName"].get(0), "decline")
-                            st.success("Successfully updated to declined!")
-                            refresh()
+                with incol1:
+                    if st.button(str(st.session_state.NTE_Quote)+" Approve", key="3"):
+                        approvetime = datetime.now()
+                        approve = approvetime.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+                        st.session_state.editable = 0
+                        updateParent(st.session_state.ticketN, st.session_state.editable, st.session_state.NTE_Quote, "1900-01-01 00:00:00.000", approve,  "1900-01-01 00:00:00.000", st.session_state.ticketDf["BranchName"].get(0), "approve")
+                        updateAll(st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, 
+                            st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df)
+                        st.success("Successfully updated to Gp!")
+                        refresh()
+                with incol2:
+                    if st.button(str(st.session_state.NTE_Quote)+"\nDecline", key="4"):
+                        declinetime = datetime.now()
+                        decline = declinetime.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+                        updateParent(st.session_state.ticketN, 1, st.session_state.NTE_Quote, "1900-01-01 00:00:00.000",  "1900-01-01 00:00:00.000", decline, st.session_state.ticketDf["BranchName"].get(0), "decline")
+                        updateAll(st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, 
+                            st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df)
+                        st.success("Successfully updated to declined!")
+                        refresh()
                 incol1, incol2, incol3 = st.columns([1,1,1])
             category_table_data = []
             for category in categories:
