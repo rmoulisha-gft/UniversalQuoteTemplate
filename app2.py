@@ -27,8 +27,8 @@ from reportlab.platypus import Paragraph
 import numpy as np
 import re
 from api.fmDash import submitFmQuotes
-# from api.verisae import submitQuoteVerisae
-# from api.circleK import wo_cost_information
+from api.verisae import submitQuoteVerisae
+from api.circleK import wo_cost_information
 from reportlab.graphics.renderPM import PMCanvas
 from decimal import Decimal
 from reportlab.pdfbase.pdfmetrics import registerFont
