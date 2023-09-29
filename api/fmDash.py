@@ -5,37 +5,21 @@ import os
 
 token = os.environ.get("fmDashtoken")
 
-def getOpenWO(filename):
-    api_url = f"https://fmdashboard-staging.herokuapp.com/api/work_orders?token={token}"
-    response = requests.get(api_url)
-
-    if response.status_code == 200:
-        data = response.json()
-
-        # Save the data to a JSON file
-        with open(filename, "w") as json_file:
-            json.dump(data, json_file, indent=4)
-
-        print("Work orders saved to getWO.json")
-
-    else:
-        print("Failed to fetch work orders. Status code:", response.status_code)
-
-def submitFmQuotes(pdf_base64):
-    work_order_id = "118918"
+def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip_df, parts_df, misc_df, materials_df, sub_df):
+    # work_order_id = "118918"
     api_url = f"https://fmdashboard-staging.herokuapp.com/api/work_orders/{work_order_id}/quotes?token={token}"
 
-    # with open("input.pdf", "rb") as pdf_file:
-    #     pdf_content = pdf_file.read()
-    #     pdf_base64 = base64.b64encode(pdf_content).decode("utf-8")
+    with open("input.pdf", "rb") as pdf_file:
+        pdf_content = pdf_file.read()
+        pdf_base64 = base64.b64encode(pdf_content).decode("utf-8")
 
     quote_data = {
         "id": work_order_id,
-        "incurred_description": "This is the incurred description of my first test ",
-        "proposed_description": "This is the proposed_description of my first test",
+        "incurred_description": incurred,
+        "proposed_description": proposed,
         "ready": True,
-        "incurred_trip_charge": 0,
-        "proposed_trip_charge": 0,
+        "incurred_trip_charge": labor_df['Incurred'].sum() + trip_df['Incurred'].sum(), 
+        "proposed_trip_charge": labor_df['Proposed'].sum() + trip_df['Proposed'].sum(), 
         "total": 0,
         "make": "string",
         "model": "string",
@@ -44,9 +28,11 @@ def submitFmQuotes(pdf_base64):
         "document": pdf_base64,
         "document_cache": "string",
         "incurred_time": 0,
-        "incurred_material": 0,
+        "incurred_material": parts_df['Incurred'].sum(),
+        # incurred parts
         "proposed_time": 0,
-        "proposed_material": 0,
+        "proposed_material": parts_df['Incurred'].sum() + misc_df.sum() + materials_df.sum() + sub_df.sums(),
+        # proposed parts + misc + material + sub
         "tax_total": 0,
         "approval_document_file": "string"
     }
