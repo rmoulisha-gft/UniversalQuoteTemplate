@@ -21,7 +21,7 @@ def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip
         "ready": True,
         "incurred_trip_charge": labor_df['Incurred'].sum() + trip_df['Incurred'].sum(), 
         "proposed_trip_charge": labor_df['Proposed'].sum() + trip_df['Proposed'].sum(), 
-        "total": f"{total:.2f}",
+        "total": total,
         "make": "string",
         "model": "string",
         "serial_number": "string",
@@ -34,7 +34,7 @@ def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip
         "proposed_time": 0,
         "proposed_material": parts_df['Incurred'].sum() + misc_df.sum() + materials_df.sum() + sub_df.sums(),
         # proposed parts + misc + material + sub
-        "tax_total": f"{taxTotal:.2f}",
+        "tax_total": taxTotal,
         "approval_document_file": "string"
     }
 
