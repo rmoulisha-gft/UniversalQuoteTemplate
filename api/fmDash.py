@@ -4,8 +4,9 @@ import json
 import os
 
 token = os.environ.get("fmDashtoken")
+# 230726-0289
 
-def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip_df, parts_df, misc_df, materials_df, sub_df):
+def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip_df, parts_df, misc_df, materials_df, sub_df, total, taxTotal):
     # work_order_id = "118918"
     api_url = f"https://fmdashboard-staging.herokuapp.com/api/work_orders/{work_order_id}/quotes?token={token}"
 
@@ -20,7 +21,7 @@ def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip
         "ready": True,
         "incurred_trip_charge": labor_df['Incurred'].sum() + trip_df['Incurred'].sum(), 
         "proposed_trip_charge": labor_df['Proposed'].sum() + trip_df['Proposed'].sum(), 
-        "total": 0,
+        "total": f"{total:.2f}",
         "make": "string",
         "model": "string",
         "serial_number": "string",
@@ -33,7 +34,7 @@ def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip
         "proposed_time": 0,
         "proposed_material": parts_df['Incurred'].sum() + misc_df.sum() + materials_df.sum() + sub_df.sums(),
         # proposed parts + misc + material + sub
-        "tax_total": 0,
+        "tax_total": f"{taxTotal:.2f}",
         "approval_document_file": "string"
     }
 
