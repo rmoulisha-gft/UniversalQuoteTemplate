@@ -1172,11 +1172,13 @@ def mainPage():
                     pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
                     pdf_display = F'<iframe src="data:application/pdf;base64,{pdf_base64}" width="800" height="950" type="application/pdf"></iframe>'
                     st.markdown(pdf_display, unsafe_allow_html=True)
-                if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001"):
-                    if st.sidebar.button("Submit to FMDash", type = "primary"):
-                        st.sidebar.write("fmdash" + st.session_state.ticketDf['Purchase_Order'])
-                        submitFmQuotes(pdf_base64, st.session_state.ticketDf['Purchase_Order'], str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df, total_price, total_price_with_tax)
                 
+            if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001" and pdf_base64 is not None):
+                pdf_display = F'<iframe src="data:application/pdf;base64,{pdf_base64}" width="800" height="950" type="application/pdf"></iframe>'
+                st.markdown(pdf_display, unsafe_allow_html=True)
+                if st.sidebar.button("Submit to FMDash"):
+                    st.sidebar.write("fmdash" + st.session_state.ticketDf['Purchase_Order'])
+                    submitFmQuotes(pdf_base64, st.session_state.ticketDf['Purchase_Order'], str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df, total_price, total_price_with_tax)
             if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "CIR0001"):
                 if st.sidebar.button("Submit to CircleK", key="circlek"):
                     st.write("circlek" + st.session_state.ticketDf['Purchase_Order'])
