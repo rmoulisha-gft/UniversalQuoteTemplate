@@ -8,14 +8,17 @@ token = os.environ.get("fmDashtoken")
 
 def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip_df, parts_df, misc_df, materials_df, sub_df, total, taxTotal):
     api_url = f"https://fmdashboard-staging.herokuapp.com/api/work_orders/{work_order_id}/quotes?token={token}"
- 
+
+    # with open("input.pdf", "rb") as pdf_file:
+    #     pdf_content = pdf_file.read()
+    #     pdf_base64 = base64.b64encode(pdf_content).decode("utf-8")
+
     laborIncurredmask = (labor_df["Incurred/Proposed"] == "Incurred")
     laborProposedmask = (labor_df["Incurred/Proposed"] == "Proposed")
     tripIncurredmask = (trip_df["Incurred/Proposed"] == "Incurred")
     tripProposedmask = (trip_df["Incurred/Proposed"] == "Proposed")
     partsIncurredmask = (parts_df["Incurred/Proposed"] == "Incurred")
     partsProposedmask = (parts_df["Incurred/Proposed"] == "Proposed")
-
 
     quote_data = {
         "id": work_order_id,
