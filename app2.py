@@ -1173,18 +1173,15 @@ def mainPage():
                     st.download_button("Download PDF", merged_buffer, file_name=f'{st.session_state.ticketN}-quote.pdf', mime='application/pdf')
                     
             if st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001":
-                if st.sidebar.button("Submit to FMDash", key="6"):
-                    st.write("fmdash" + st.session_state.ticketDf['Purchase_Order'])
+                if st.sidebar.button("Submit to FMDash", key="fmdash"):
                     submitFmQuotes(pdf_base64, st.session_state.ticketDf['Purchase_Order'], str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df, total_price, total_price_with_tax)
                 
             if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "CIR0001"):
-                if st.sidebar.button("Submit to CircleK", key="7"):
-                    st.write("circlek" + st.session_state.ticketDf['Purchase_Order'])
+                if st.sidebar.button("Submit to CircleK", key="circlek"):
                     wo_cost_information(category_totals["Labor"], category_totals["Trip Charge"], category_totals["Parts"], category_totals["Miscellaneous Charges"], category_totals["Materials and Rentals"], category_totals["Subcontractor"], taxRate, st.session_state.ticketDf['Purchase_Order'])
             
             if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MUR0001"):
                 if st.sidebar.button("Submit to Verisae", key = "verisae"):
-                    st.write("verisae" + st.session_state.ticketDf['Purchase_Order'])
                     submitQuoteVerisae(st.session_state.ticketDf['CUST_NAME'].get(0), st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)) + str(st.session_state.workDesDf["Proposed"].get(0)), category_totals["Trip Charge"], category_totals["Parts"], category_totals["Labor"], category_totals["Miscellaneous Charges"], taxRate, st.session_state.ticketDf['Purchase_Order'])
         # except Exception as e:
         #     st.error("Please enter a ticket number or check the ticket number again")
