@@ -1175,7 +1175,8 @@ def mainPage():
                     st.markdown(pdf_display, unsafe_allow_html=True)
                 
             if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001" and pdf_base64 is not None):
-                if st.sidebar.button("Submit to FMDash"):
+                if st.sidebar.button("Submit to FMDash", key="6"):
+                    st.sidebar.write("fmdash" + st.session_state.ticketDf['Purchase_Order'])
                     st.write("fmdash" + st.session_state.ticketDf['Purchase_Order'])
                     submitFmQuotes(pdf_base64, st.session_state.ticketDf['Purchase_Order'], str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df, total_price, total_price_with_tax)
             if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "CIR0001"):
