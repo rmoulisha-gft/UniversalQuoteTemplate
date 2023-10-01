@@ -957,6 +957,7 @@ def mainPage():
             """
             col2.dataframe(pd.DataFrame(category_table_data, columns=["Category", "Total"]), hide_index=True)
             col2.write(right_column_content)
+            pdf_base64 = None
             if incol2.button("Close PDF"):
                 incol2.text("PDF Closed")
             if(incol1.button("Open PDF")):
