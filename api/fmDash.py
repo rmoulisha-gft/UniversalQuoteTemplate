@@ -33,14 +33,11 @@ def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip
         "document_cache": "string",
         "incurred_time": 0,
         "incurred_material": parts_df.loc[partsIncurredmask,'EXTENDED'].sum(),
-        # incurred parts
         "proposed_time": 0,
         "proposed_material": parts_df.loc[partsProposedmask,'EXTENDED'].sum() + misc_df['EXTENDED'].sum() + materials_df['EXTENDED'].sum() + sub_df['EXTENDED'].sum(),
-        # proposed parts + misc + material + sub
         "tax_total": taxTotal,
         "approval_document_file": "string"
     }
-    print(quote_data)
 
     response = requests.post(api_url, json=quote_data)
 
