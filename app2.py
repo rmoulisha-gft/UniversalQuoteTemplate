@@ -957,230 +957,228 @@ def mainPage():
             """
             col2.dataframe(pd.DataFrame(category_table_data, columns=["Category", "Total"]), hide_index=True)
             col2.write(right_column_content)
-            pdf_base64 = None
-            if incol2.button("Close PDF"):
-                incol2.text("PDF Closed")
-            if(incol1.button("Open PDF")):
-                with col1:
-                    input_pdf = PdfReader(open('input.pdf', 'rb'))
-                    buffer = io.BytesIO()
-                    c = canvas.Canvas(buffer, pagesize=letter)
-                    c.setFont("Arial", 9)
-                    c.drawString(25, 675.55, str(st.session_state.ticketDf['CUST_NAME'].values[0]))
-                    c.drawString(25, 665.55, str(st.session_state.ticketDf['CUST_ADDRESS1'].values[0]))
-                    c.drawString(25, 655.55, str(st.session_state.ticketDf['CUST_ADDRESS2'].values[0]) + " " + str(st.session_state.ticketDf['CUST_ADDRESS3'].values[0]) + " " +
-                                str(st.session_state.ticketDf['CUST_CITY'].values[0]) + " " + str(st.session_state.ticketDf['CUST_Zip'].values[0]))
-                    
-                    c.drawString(50, 582, str(st.session_state.ticketDf['LOC_LOCATNNM'].values[0]))
-                    c.drawString(50, 572, st.session_state.ticketDf['LOC_Address'].values[0] + " " + st.session_state.ticketDf['CITY'].values[0] + " " + 
-                        st.session_state.ticketDf['STATE'].values[0]+ " " + st.session_state.ticketDf['ZIP'].values[0])
-                    c.drawString(70, 542, str(st.session_state.ticketDf['MailDispatch'].values[0]))
-                    c.drawString(310, 582, str(st.session_state.ticketN))
-                    c.drawString(310, 562, str(st.session_state.ticketDf['Purchase_Order'].values[0]))
-                    
-                    NTE_QTE = st.session_state.NTE_Quote
-                    if NTE_QTE is not None:
-                        NTE_QTE = "NTE/Quote# " + str(NTE_QTE)
-                    else:
-                        NTE_QTE = "NTE/Quote# None"
-                        
-                    c.setFont("Arial", 8)
-                    c.drawString(444, 580.55, str(NTE_QTE))
-                    c.setFont("Arial", 9)
-                    c.drawString(470, 551, str(formatted_date))
-                    c.setFont("Arial", 9)
+            input_pdf = PdfReader(open('input.pdf', 'rb'))
+            buffer = io.BytesIO()
+            c = canvas.Canvas(buffer, pagesize=letter)
+            c.setFont("Arial", 9)
+            c.drawString(25, 675.55, str(st.session_state.ticketDf['CUST_NAME'].values[0]))
+            c.drawString(25, 665.55, str(st.session_state.ticketDf['CUST_ADDRESS1'].values[0]))
+            c.drawString(25, 655.55, str(st.session_state.ticketDf['CUST_ADDRESS2'].values[0]) + " " + str(st.session_state.ticketDf['CUST_ADDRESS3'].values[0]) + " " +
+                        str(st.session_state.ticketDf['CUST_CITY'].values[0]) + " " + str(st.session_state.ticketDf['CUST_Zip'].values[0]))
+            
+            c.drawString(50, 582, str(st.session_state.ticketDf['LOC_LOCATNNM'].values[0]))
+            c.drawString(50, 572, st.session_state.ticketDf['LOC_Address'].values[0] + " " + st.session_state.ticketDf['CITY'].values[0] + " " + 
+                st.session_state.ticketDf['STATE'].values[0]+ " " + st.session_state.ticketDf['ZIP'].values[0])
+            c.drawString(70, 542, str(st.session_state.ticketDf['MailDispatch'].values[0]))
+            c.drawString(310, 582, str(st.session_state.ticketN))
+            c.drawString(310, 562, str(st.session_state.ticketDf['Purchase_Order'].values[0]))
+            
+            NTE_QTE = st.session_state.NTE_Quote
+            if NTE_QTE is not None:
+                NTE_QTE = "NTE/Quote# " + str(NTE_QTE)
+            else:
+                NTE_QTE = "NTE/Quote# None"
+                
+            c.setFont("Arial", 8)
+            c.drawString(444, 580.55, str(NTE_QTE))
+            c.setFont("Arial", 9)
+            c.drawString(470, 551, str(formatted_date))
+            c.setFont("Arial", 9)
 
-                    text_box_width = 560
-                    text_box_height = 100
-                    
-                    incurred_text = "Incurred Workdescription: "+str(st.session_state.workDesDf["Incurred"].get(0))
-                    proposed_text = "Proposed Workdescription: "+str(st.session_state.workDesDf["Proposed"].get(0))
-                    general_description = incurred_text + proposed_text
+            text_box_width = 560
+            text_box_height = 100
+            
+            incurred_text = "Incurred Workdescription: "+str(st.session_state.workDesDf["Incurred"].get(0))
+            proposed_text = "Proposed Workdescription: "+str(st.session_state.workDesDf["Proposed"].get(0))
+            general_description = incurred_text + proposed_text
 
-                    if len(general_description) > 4500:
-                        if len(incurred_text) > 2500:
-                            incurred_text = str(st.session_state.workDesDf["Incurred"].get(0))[:2500] + " ... max of 2500 chars"
-                        if len(proposed_text) > 2000:
-                            proposed_text = str(st.session_state.workDesDf["Proposed"].get(0))[:2000] + " ... max of 2000 chars"
-                    
-                    general_description = (
-                        incurred_text
-                        + "<br/><br/>"
-                        + proposed_text
-                    )
-                    
-                    styles = getSampleStyleSheet()
-                    paragraph_style = styles["Normal"]
-                    if general_description is not None:
-                        paragraph = Paragraph(general_description, paragraph_style)
-                    else:
-                        paragraph = Paragraph("Nothing has been entered", paragraph_style)
-                        
-                    paragraph.wrapOn(c, text_box_width, text_box_height)
-                    paragraph_height = paragraph.wrapOn(c, text_box_width, text_box_height)[1]
-                    paragraph.drawOn(c, 25, 485.55 - paragraph_height)
+            if len(general_description) > 4500:
+                if len(incurred_text) > 2500:
+                    incurred_text = str(st.session_state.workDesDf["Incurred"].get(0))[:2500] + " ... max of 2500 chars"
+                if len(proposed_text) > 2000:
+                    proposed_text = str(st.session_state.workDesDf["Proposed"].get(0))[:2000] + " ... max of 2000 chars"
+            
+            general_description = (
+                incurred_text
+                + "<br/><br/>"
+                + proposed_text
+            )
+            
+            styles = getSampleStyleSheet()
+            paragraph_style = styles["Normal"]
+            if general_description is not None:
+                paragraph = Paragraph(general_description, paragraph_style)
+            else:
+                paragraph = Paragraph("Nothing has been entered", paragraph_style)
+                
+            paragraph.wrapOn(c, text_box_width, text_box_height)
+            paragraph_height = paragraph.wrapOn(c, text_box_width, text_box_height)[1]
+            paragraph.drawOn(c, 25, 485.55 - paragraph_height)
 
-                    block_x = 7
-                    block_width = 577
-                    block_height = paragraph_height+10
-                    block_y = 387.55 - (block_height-100)
-                    border_width = 1.5
-                    right_block_x = block_x + 10
-                    right_block_y = block_y
-                    right_block_width = block_width
-                    right_block_height = block_height
-                    c.rect(right_block_x, right_block_y, right_block_width, right_block_height, fill=0)
-                    c.rect(right_block_x + border_width, right_block_y + border_width, right_block_width - 2 * border_width, right_block_height - 2 * border_width, fill=0)  # Inner border
-                    c.setFont("Arial", 9)
-                    # after
-                    y = 386.55 - (block_height-60)
-                    margin_bottom = 20
-                    first_page = True
+            block_x = 7
+            block_width = 577
+            block_height = paragraph_height+10
+            block_y = 387.55 - (block_height-100)
+            border_width = 1.5
+            right_block_x = block_x + 10
+            right_block_y = block_y
+            right_block_width = block_width
+            right_block_height = block_height
+            c.rect(right_block_x, right_block_y, right_block_width, right_block_height, fill=0)
+            c.rect(right_block_x + border_width, right_block_y + border_width, right_block_width - 2 * border_width, right_block_height - 2 * border_width, fill=0)  # Inner border
+            c.setFont("Arial", 9)
+            # after
+            y = 386.55 - (block_height-60)
+            margin_bottom = 20
+            first_page = True
+            new_page_needed = False
+
+            for category in categories:
+                if new_page_needed:
+                    c.showPage()
+                    first_page = False
                     new_page_needed = False
+                    y = 750
 
-                    for category in categories:
+                table_df = getattr(st.session_state, f"{category.lower().replace(' ', '_')}_df")
+                row_height = 20
+                category_column_width = block_width / 7
+
+                if table_df.notna().any().any():
+                    table_rows = table_df.to_records(index=False)
+                    column_names = table_df.columns
+                    row_height = 20
+                    if(len(column_names)==4):
+                        category_column_width = block_width / 6
+                    else:
+                        category_column_width = block_width / 7
+
+                    if not first_page and y - (len(table_rows) + 4) * row_height < margin_bottom:
+                        c.showPage()
+                        first_page = False
+                        y = 750
+
+                    x = 17
+                    col_width = category_column_width
+                    for col_name in column_names:
+                        if category != 'Labor':
+                            if col_name == 'Description':
+                                col_width = category_column_width * 3
+                            elif col_name in ['QTY', 'UNIT Price', 'EXTENDED', 'Incurred/Proposed']:
+                                col_width = category_column_width
+                        c.rect(x, y, col_width, row_height)
+                        c.setFont("Arial", 9)
+                        c.drawString(x + 5, y + 5, str(col_name))
+                        x += col_width
+                    y -= row_height
+                    for row in table_rows:
+                        x = 17
+                        count = 0
+                        next_width = None
+                        for col in row:
+                            if count == 0:
+                                col_width = category_column_width * 3
+                            else:
+                                col_width = next_width if next_width else category_column_width
+
+                            if col in ['Incurred', 'Proposed', None]:
+                                col_width = category_column_width
+                                next_width = category_column_width * 3
+                            else:
+                                next_width = None
+                            if col is not None and isinstance(col, str):
+                                match = re.match(r'^[^:\d.]+.*', col)
+                                if match:
+                                    if y - row_height < margin_bottom:
+                                        c.showPage()
+                                        first_page = False
+                                        y = 750
+                                    first_string = match.group()
+                                    if category == 'Labor' or category == 'Miscellaneous Charges' or category == 'Trip Charge':
+                                        first_string = re.sub(r":.*", "", first_string)
+                                    if category == 'Labor':
+                                        col_width = category_column_width
+                                    c.rect(x, y, col_width, row_height)
+                                    c.setFont("Arial", 9)
+                                    crop = 47
+                                    if len(str(first_string)) < crop:
+                                        c.drawString(x + 5, y + 5, str(first_string))
+                                    else:
+                                        c.drawString(x + 5, y + 5, str(first_string)[:crop])
+                            else:
+                                if category == 'Labor':
+                                    col_width = category_column_width
+                                c.rect(x, y, col_width, row_height)
+                                c.setFont("Arial", 9)
+                                c.drawString(x + 5, y + 5, str(col))
+                            x += col_width
+                            count+=1
+                        y -= row_height
                         if new_page_needed:
                             c.showPage()
                             first_page = False
                             new_page_needed = False
-                            y = 750
+                            y = 750                    
 
-                        table_df = getattr(st.session_state, f"{category.lower().replace(' ', '_')}_df")
-                        row_height = 20
-                        category_column_width = block_width / 7
-
-                        if table_df.notna().any().any():
-                            table_rows = table_df.to_records(index=False)
-                            column_names = table_df.columns
-                            row_height = 20
-                            if(len(column_names)==4):
-                                category_column_width = block_width / 6
-                            else:
-                                category_column_width = block_width / 7
-
-                            if not first_page and y - (len(table_rows) + 4) * row_height < margin_bottom:
-                                c.showPage()
-                                first_page = False
-                                y = 750
-
-                            x = 17
-                            col_width = category_column_width
-                            for col_name in column_names:
-                                if category != 'Labor':
-                                    if col_name == 'Description':
-                                        col_width = category_column_width * 3
-                                    elif col_name in ['QTY', 'UNIT Price', 'EXTENDED', 'Incurred/Proposed']:
-                                        col_width = category_column_width
-                                c.rect(x, y, col_width, row_height)
-                                c.setFont("Arial", 9)
-                                c.drawString(x + 5, y + 5, str(col_name))
-                                x += col_width
-                            y -= row_height
-                            for row in table_rows:
-                                x = 17
-                                count = 0
-                                next_width = None
-                                for col in row:
-                                    if count == 0:
-                                        col_width = category_column_width * 3
-                                    else:
-                                        col_width = next_width if next_width else category_column_width
-
-                                    if col in ['Incurred', 'Proposed', None]:
-                                        col_width = category_column_width
-                                        next_width = category_column_width * 3
-                                    else:
-                                        next_width = None
-                                    if col is not None and isinstance(col, str):
-                                        match = re.match(r'^[^:\d.]+.*', col)
-                                        if match:
-                                            if y - row_height < margin_bottom:
-                                                c.showPage()
-                                                first_page = False
-                                                y = 750
-                                            first_string = match.group()
-                                            if category == 'Labor' or category == 'Miscellaneous Charges' or category == 'Trip Charge':
-                                                first_string = re.sub(r":.*", "", first_string)
-                                            if category == 'Labor':
-                                                col_width = category_column_width
-                                            c.rect(x, y, col_width, row_height)
-                                            c.setFont("Arial", 9)
-                                            crop = 47
-                                            if len(str(first_string)) < crop:
-                                                c.drawString(x + 5, y + 5, str(first_string))
-                                            else:
-                                                c.drawString(x + 5, y + 5, str(first_string)[:crop])
-                                    else:
-                                        if category == 'Labor':
-                                            col_width = category_column_width
-                                        c.rect(x, y, col_width, row_height)
-                                        c.setFont("Arial", 9)
-                                        c.drawString(x + 5, y + 5, str(col))
-                                    x += col_width
-                                    count+=1
-                                y -= row_height
-                                if new_page_needed:
-                                    c.showPage()
-                                    first_page = False
-                                    new_page_needed = False
-                                    y = 750                    
-
-
-                            category_total = np.round(table_df['EXTENDED'].sum(), 2)
-                            c.rect(17, y, block_width, row_height)
-                            c.drawRightString(block_width + 12, y + 5, f"{category} Total: {category_total}")
-                            y -= row_height
-
-                            if y < margin_bottom:
-                                c.showPage()
-                                first_page = False
-                                y = 750
-
-
-                    total_price_with_tax = total_price * (1 + taxRate / 100.0)
+                    category_total = np.round(table_df['EXTENDED'].sum(), 2)
                     c.rect(17, y, block_width, row_height)
-                    c.drawRightString(block_width + 12, y + 5, f"Price (Pre-Tax): ${total_price:.2f}")
+                    c.drawRightString(block_width + 12, y + 5, f"{category} Total: {category_total}")
                     y -= row_height
-                    c.rect(17, y, block_width, row_height)
-                    c.drawRightString(block_width + 12, y + 5, f"Estimated Sales Tax: {total_price*taxRate/100:.2f}")
-                    y -= row_height
-                    c.rect(17, y, block_width, row_height)
-                    c.drawRightString(block_width + 12, y + 5, f"Total (including tax): ${total_price_with_tax:.2f}")
 
-                    c.save()
-                    buffer.seek(0)
-                    output_pdf = PdfWriter()
+                    if y < margin_bottom:
+                        c.showPage()
+                        first_page = False
+                        y = 750
+                        
+            total_price_with_tax = total_price * (1 + taxRate / 100.0)
+            c.rect(17, y, block_width, row_height)
+            c.drawRightString(block_width + 12, y + 5, f"Price (Pre-Tax): ${total_price:.2f}")
+            y -= row_height
+            c.rect(17, y, block_width, row_height)
+            c.drawRightString(block_width + 12, y + 5, f"Estimated Sales Tax: {total_price*taxRate/100:.2f}")
+            y -= row_height
+            c.rect(17, y, block_width, row_height)
+            c.drawRightString(block_width + 12, y + 5, f"Total (including tax): ${total_price_with_tax:.2f}")
 
-                    input_pdf = PdfReader('input.pdf')
-                    text_pdf = PdfReader(buffer)
+            c.save()
+            buffer.seek(0)
+            output_pdf = PdfWriter()
 
-                    for i in range(len(input_pdf.pages)):
-                        page = input_pdf.pages[i]
-                        if i == 0:
-                            page.merge_page(text_pdf.pages[0])
-                        output_pdf.add_page(page)
+            input_pdf = PdfReader('input.pdf')
+            text_pdf = PdfReader(buffer)
 
-                    for page in text_pdf.pages[1:]:
-                        output_pdf.add_page(page)
+            for i in range(len(input_pdf.pages)):
+                page = input_pdf.pages[i]
+                if i == 0:
+                    page.merge_page(text_pdf.pages[0])
+                output_pdf.add_page(page)
 
-                    merged_buffer = io.BytesIO()
-                    output_pdf.write(merged_buffer)
+            for page in text_pdf.pages[1:]:
+                output_pdf.add_page(page)
 
-                    merged_buffer.seek(0)
-                    st.download_button("Download PDF", merged_buffer, file_name=f'{st.session_state.ticketN}-quote.pdf', mime='application/pdf')
+            merged_buffer = io.BytesIO()
+            output_pdf.write(merged_buffer)
 
-                    pdf_content = merged_buffer.read()
-                    pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+            merged_buffer.seek(0)
+
+            pdf_content = merged_buffer.read()
+            pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+            
+            if incol2.button("Close PDF"):
+                incol2.text("PDF Closed")
+            if(incol1.button("Open PDF")):
+                with col1:
                     pdf_display = F'<iframe src="data:application/pdf;base64,{pdf_base64}" width="800" height="950" type="application/pdf"></iframe>'
                     st.markdown(pdf_display, unsafe_allow_html=True)
-                
-            if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001" and pdf_base64 is not None):
-                if st.sidebar.button("Submit to FMDash", key="fmdash"):
-                    st.write("verisae" + st.session_state.ticketDf['Purchase_Order'])
+                    st.download_button("Download PDF", merged_buffer, file_name=f'{st.session_state.ticketN}-quote.pdf', mime='application/pdf')
+                    
+            if st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001":
+                if st.sidebar.button("Submit to FMDash", key="6"):
                     st.write("fmdash" + st.session_state.ticketDf['Purchase_Order'])
                     submitFmQuotes(pdf_base64, st.session_state.ticketDf['Purchase_Order'], str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df, total_price, total_price_with_tax)
+                
             if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "CIR0001"):
-                if st.sidebar.button("Submit to CircleK", key="circlek"):
+                if st.sidebar.button("Submit to CircleK", key="7"):
                     st.write("circlek" + st.session_state.ticketDf['Purchase_Order'])
                     wo_cost_information(category_totals["Labor"], category_totals["Trip Charge"], category_totals["Parts"], category_totals["Miscellaneous Charges"], category_totals["Materials and Rentals"], category_totals["Subcontractor"], taxRate, st.session_state.ticketDf['Purchase_Order'])
             
@@ -1188,7 +1186,6 @@ def mainPage():
                 if st.sidebar.button("Submit to Verisae", key = "verisae"):
                     st.write("verisae" + st.session_state.ticketDf['Purchase_Order'])
                     submitQuoteVerisae(st.session_state.ticketDf['CUST_NAME'].get(0), st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)) + str(st.session_state.workDesDf["Proposed"].get(0)), category_totals["Trip Charge"], category_totals["Parts"], category_totals["Labor"], category_totals["Miscellaneous Charges"], taxRate, st.session_state.ticketDf['Purchase_Order'])
-
         # except Exception as e:
         #     st.error("Please enter a ticket number or check the ticket number again")
 
