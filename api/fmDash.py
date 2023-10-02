@@ -6,12 +6,41 @@ import os
 token = os.environ.get("fmDashtoken")
 # 230726-0289
 
+def checkout(work_order_id):
+    url = f"https://fmdashboard-staging.herokuapp.com/api/work_orders/{work_order_id}/checkout"
+    headers = {
+        "Content-Type": "application/json",
+    }
+
+    payload = {
+        "checkout": {
+            "description": "This is the description of my checkout. Thanks!",
+            "status": "150",
+            "resolution": "Repaired"
+        }
+    }
+    payload_json = json.dumps(payload)
+    response = requests.post(url, headers=headers, data=payload_json)
+
+def getNeedToQuote():
+    url = f"https://fmdashboard-staging.herokuapp.com/api/work_orders/status_filter=150&?token={token}"
+    headers = {
+        'Authorization': f'Bearer :{token}',
+    }
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        work_orders = response.json()
+        print(work_orders)
+    else:
+        print(f"Request failed with status code: {response.status_code}")
+
 def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip_df, parts_df, misc_df, materials_df, sub_df, total, taxTotal):
     api_url = f"https://fmdashboard-staging.herokuapp.com/api/work_orders/{work_order_id}/quotes?token={token}"
 
-    # with open("input.pdf", "rb") as pdf_file:
-    #     pdf_content = pdf_file.read()
-    #     pdf_base64 = base64.b64encode(pdf_content).decode("utf-8")
+    with open("input.pdf", "rb") as pdf_file:
+        pdf_content = pdf_file.read()
+        pdf_base64 = base64.b64encode(pdf_content).decode("utf-8")
 
     laborIncurredmask = (labor_df["Incurred/Proposed"] == "Incurred")
     laborProposedmask = (labor_df["Incurred/Proposed"] == "Proposed")
@@ -20,7 +49,8 @@ def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip
     partsIncurredmask = (parts_df["Incurred/Proposed"] == "Incurred")
     partsProposedmask = (parts_df["Incurred/Proposed"] == "Proposed")
 
-    quote_data = {
+    payload = {
+        "quote": {
         "id": work_order_id,
         "incurred_description": incurred,
         "proposed_description": proposed,
@@ -41,11 +71,12 @@ def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip
         "tax_total": taxTotal,
         "approval_document_file": "string"
     }
-
-    response = requests.post(api_url, json=quote_data)
-
+    }
+    headers = {}
+    response = requests.post(api_url, json=payload, headers=headers)
     if response.status_code == 200:
-        data = response.json()
-        print("Quote submitted successfully. Quote ID:", data.get("id"))
+        # data = response.json()
+        # print(data)
+        print("Quote submitted. Quote ID:", response.text)
     else:
         print("Failed to submit quote. Status code:", response.status_code)
