@@ -1178,10 +1178,12 @@ def mainPage():
                 if st.sidebar.button("Submit to FMDash"):
                     try:
                         checkout(st.session_state.ticketDf['Purchase_Order'].values[0])
+                        st.write("checkedout")
                         submitFmQuotes(pdf_base64, st.session_state.ticketDf['Purchase_Order'].values[0], str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df, total_price, total_price_with_tax)
+                        st.write("submitted")
                     except Exception as e:
                         st.write(f"Please check if {st.session_state.ticketDf['Purchase_Order'].values[0]} has been created")
-                    st.experimental_rerun()
+                    # st.experimental_rerun()
 
             if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "CIR0001"):
                 if st.sidebar.button("Submit to CircleK"):
