@@ -1183,7 +1183,7 @@ def mainPage():
                         st.write("submitted")
                     except Exception as e:
                         st.write(f"Please check if {st.session_state.ticketDf['Purchase_Order'].values[0]} has been created")
-                    # st.experimental_rerun()
+                    st.experimental_rerun()
 
             if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "CIR0001"):
                 if st.sidebar.button("Submit to CircleK"):
