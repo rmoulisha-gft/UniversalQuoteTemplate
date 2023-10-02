@@ -258,6 +258,68 @@ def mainPage():
                             concatenated_values = [description + value for description, value in zip(st.session_state.LRatesDf['Pay_Code_Description'], string_values)]    
                             if not st.session_state.labor_df.empty:
                                 st.write("Archived Labor (Delete row when necessary please dont add rows)")
+                                st.session_state.labor_df = st.data_editor(
+                                    st.session_state.labor_df,
+                                    column_config={
+                                        "Incurred/Proposed": st.column_config.SelectboxColumn(
+                                            "Incurred/Proposed",
+                                            help="Incurred",
+                                            width=inwidth/6,
+                                            disabled=True,
+                                            options=["Incurred", "Proposed"],
+                                        ),
+                                        "Description": st.column_config.SelectboxColumn(
+                                            "Description",
+                                            help="Description",
+                                            width=inwidth/6,
+                                            disabled=True,
+                                            options=concatenated_values
+                                        ),
+                                        "Nums of Techs": st.column_config.NumberColumn(
+                                            "Nums of Techs",
+                                            help="Nums of Techs",
+                                            width=inwidth/6,
+                                            min_value=1,
+                                            disabled=True,
+                                            step=1
+                                        ),
+                                        "Hours per Tech": st.column_config.NumberColumn(
+                                            "Hours per Tech",
+                                            help="Hours per Tech",
+                                            width=inwidth/6,
+                                            min_value=0.00,
+                                            disabled=True,
+                                            step = 0.25
+                                        ),
+                                        "QTY": st.column_config.NumberColumn(
+                                            "QTY",
+                                            help="Quantity",
+                                            width=inwidth/6,
+                                            min_value=0.00,
+                                            step = 0.25,
+                                            disabled=True,
+                                        ),
+                                        "Hourly Rate": st.column_config.NumberColumn(
+                                            "Hourly Rate",
+                                            help="Hourly Rate",
+                                            width=inwidth/6,
+                                            min_value=0.00,
+                                            disabled=True,
+                                        ),
+                                        "EXTENDED": st.column_config.NumberColumn(
+                                            "EXTENDED",
+                                            help="Extended Amount",
+                                            width=inwidth/6,
+                                            disabled=True,
+                                            min_value=0.00,
+                                            format="%.2f"
+                                        ),
+                                    },
+                                    hide_index=True,
+                                    width=width,
+                                    num_rows="dynamic",
+                                    key=category
+                                )
                                 category_total = st.session_state.labor_df['EXTENDED'].sum()
                             # new
                             with st.form(key='Labor_form', clear_on_submit=True):
@@ -1119,6 +1181,7 @@ def mainPage():
                         submitFmQuotes(pdf_base64, st.session_state.ticketDf['Purchase_Order'], str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df, total_price, total_price_with_tax)
                     except Exception as e:  # Catch any exceptions and handle them appropriately
                         st.write(f"Please check if {st.session_state.ticketDf['Purchase_Order']} has been created")
+
             if(st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "CIR0001"):
                 if st.sidebar.button("Submit to CircleK", key="7"):
                     wo_cost_information(category_totals["Labor"], category_totals["Trip Charge"], category_totals["Parts"], category_totals["Miscellaneous Charges"], category_totals["Materials and Rentals"], category_totals["Subcontractor"], taxRate, st.session_state.ticketDf['Purchase_Order'])
