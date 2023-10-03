@@ -1171,8 +1171,8 @@ def mainPage():
             if(incol1.button("Open PDF")):
                 with col1:
                     pdf_display = F'<iframe src="data:application/pdf;base64,{pdf_base64}" width="800" height="950" type="application/pdf"></iframe>'
-                    st.markdown(pdf_display, unsafe_allow_html=True)
                     st.download_button("Download PDF", merged_buffer, file_name=f'{st.session_state.ticketN}-quote.pdf', mime='application/pdf')
+                    st.markdown(pdf_display, unsafe_allow_html=True)
                     
         if len(st.session_state.ticketDf)!=0 and st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001":
             if st.sidebar.button("Submit to FMDash"):
@@ -1189,6 +1189,7 @@ def mainPage():
             if st.sidebar.button("Submit to Verisae"):
                 submitQuoteVerisae(st.session_state.ticketDf['CUST_NAME'].get(0), st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)) + str(st.session_state.workDesDf["Proposed"].get(0)), category_totals["Trip Charge"], category_totals["Parts"], category_totals["Labor"], category_totals["Miscellaneous Charges"], taxRate, st.session_state.ticketDf['Purchase_Order'])
                 st.experimental_rerun()
+
         # except Exception as e:
         #     st.error("Please enter a ticket number or check the ticket number again")
 
