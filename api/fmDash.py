@@ -54,19 +54,19 @@ def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip
         "incurred_description": incurred,
         "proposed_description": proposed,
         "ready": True,
-        "incurred_trip_charge": trip_df.loc[tripIncurredmask,'EXTENDED'].sum(), 
-        "proposed_trip_charge": trip_df.loc[tripProposedmask,'EXTENDED'].sum(), 
+        "incurred_trip_charge": 0, 
+        "proposed_trip_charge": trip_df.loc[tripProposedmask,'EXTENDED'].sum()+trip_df.loc[tripIncurredmask,'EXTENDED'].sum(), 
         "total": total,
         "make": "string",
         "model": "string",
         "serial_number": "string",
-        "simple_quote": True,
+        "simple_quote": False,
         "document": pdf_base64,
         "document_cache": "string",
-        "incurred_time" : labor_df.loc[laborIncurredmask,'EXTENDED'].sum(),
-        "proposed_time" : labor_df.loc[laborProposedmask,'EXTENDED'].sum(),
-        "incurred_material": parts_df.loc[partsIncurredmask,'EXTENDED'].sum(),
-        "proposed_material": parts_df.loc[partsProposedmask,'EXTENDED'].sum() + misc_df['EXTENDED'].sum() + materials_df['EXTENDED'].sum() + sub_df['EXTENDED'].sum(),
+        "incurred_time" : 0,
+        "proposed_time" : labor_df.loc[laborProposedmask,'EXTENDED'].sum() + labor_df.loc[laborIncurredmask,'EXTENDED'].sum(),
+        "incurred_material": 0,
+        "proposed_material": parts_df.loc[partsIncurredmask,'EXTENDED'].sum() + parts_df.loc[partsProposedmask,'EXTENDED'].sum() + misc_df['EXTENDED'].sum() + materials_df['EXTENDED'].sum() + sub_df['EXTENDED'].sum(),
         "tax_total": taxTotal - total,
         "approval_document_file": "string"
     }
@@ -79,7 +79,7 @@ def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip
         print("Quote submitted. Quote ID:", response.text)
     else:
         print("Failed to submit quote. Status code:", response.status_code)
-
+        
 # data = {
 #     "Incurred/Proposed": ["Incurred", "Incurred", "Proposed", "Incurred", "Proposed"],
 #     "Description": ["Description1", "Description2", "Description3", "Description4", "Description5"],
