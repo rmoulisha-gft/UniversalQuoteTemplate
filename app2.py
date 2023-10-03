@@ -1182,12 +1182,18 @@ def mainPage():
 
         if(len(st.session_state.ticketDf)!=0 and st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "CIR0001"):
             if st.sidebar.button("Submit to CircleK"):
-                wo_cost_information(category_totals["Labor"], category_totals["Trip Charge"], category_totals["Parts"], category_totals["Miscellaneous Charges"], category_totals["Materials and Rentals"], category_totals["Subcontractor"], taxRate, st.session_state.ticketDf['Purchase_Order'])
+                wo_cost_information(category_totals["Labor"] if category_totals["Labor"] is not None else 0,
+                category_totals["Trip Charge"] if category_totals["Trip Charge"] is not None else 0,
+                category_totals["Parts"] if category_totals["Parts"] is not None else 0,
+                category_totals["Miscellaneous Charges"] if category_totals["Miscellaneous Charges"] is not None else 0,
+                category_totals["Materials and Rentals"] if category_totals["Materials and Rentals"] is not None else 0,
+                category_totals["Subcontractor"] if category_totals["Subcontractor"] is not None else 0,
+                taxRate, st.session_state.ticketDf['Purchase_Order'])
                 st.experimental_rerun()
         
         if(len(st.session_state.ticketDf)!=0 and st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MUR0001"):
             if st.sidebar.button("Submit to Verisae"):
-                submitQuoteVerisae(st.session_state.ticketDf['CUST_NAME'].get(0), st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)) + str(st.session_state.workDesDf["Proposed"].get(0)), category_totals["Trip Charge"], category_totals["Parts"], category_totals["Labor"], category_totals["Miscellaneous Charges"], taxRate, st.session_state.ticketDf['Purchase_Order'])
+                submitQuoteVerisae(st.session_state.ticketDf['CUST_NAME'].get(0), st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)) + str(st.session_state.workDesDf["Proposed"].get(0)), category_totals["Trip Charge"] if category_totals["Trip Charge"] is not None else 0, category_totals["Parts"] if category_totals["Parts"] is not None else 0, category_totals["Labor"] if category_totals["Labor"] is not None else 0, category_totals["Miscellaneous Charges"] if category_totals["Miscellaneous Charges"] is not None else 0, taxRate, st.session_state.ticketDf['Purchase_Order'])
                 st.experimental_rerun()
 
         # except Exception as e:
