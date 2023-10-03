@@ -52,7 +52,7 @@ def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip
         "quote": {
         "id": work_order_id,
         "incurred_description": "",
-        "proposed_description": incurred + proposed,
+        "proposed_description": "Incurred Workdescription: " + incurred + "Proposed Workdescription: " + proposed,
         "ready": True,
         "incurred_trip_charge": 0, 
         "proposed_trip_charge": trip_df.loc[tripProposedmask,'EXTENDED'].sum()+trip_df.loc[tripIncurredmask,'EXTENDED'].sum(), 
