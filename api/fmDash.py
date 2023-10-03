@@ -36,6 +36,21 @@ def getNeedToQuote():
         print(f"Request failed with status code: {response.status_code}")
 
 def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip_df, parts_df, misc_df, materials_df, sub_df, total, taxTotal):
+    url = f"https://fmdashboard-staging.herokuapp.com/api/work_orders/{work_order_id}/checkout"
+    headers = {
+        "Content-Type": "application/json",
+    }
+
+    payload = {
+        "checkout": {
+            "description": "This is the description of my checkout. Thanks!",
+            "status": "150",
+            "resolution": "Repaired"
+        }
+    }
+    payload_json = json.dumps(payload)
+    response = requests.post(url, headers=headers, data=payload_json)
+    
     api_url = f"https://fmdashboard-staging.herokuapp.com/api/work_orders/{work_order_id}/quotes?token={token}"
 
     # with open("input.pdf", "rb") as pdf_file:
