@@ -1176,37 +1176,6 @@ def mainPage():
                     
         if len(st.session_state.ticketDf)!=0 and st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001":
             if st.sidebar.button("Submit to FMDash"):
-                laborIncurredmask = (st.session_state.labor_df["Incurred/Proposed"] == "Incurred")
-                laborProposedmask = (st.session_state.labor_df["Incurred/Proposed"] == "Proposed")
-                tripIncurredmask = (st.session_state.trip_charge_df["Incurred/Proposed"] == "Incurred")
-                tripProposedmask = (st.session_state.trip_charge_df["Incurred/Proposed"] == "Proposed")
-                partsIncurredmask = (st.session_state.parts_df["Incurred/Proposed"] == "Incurred")
-                partsProposedmask = (st.session_state.parts_df["Incurred/Proposed"] == "Proposed")
-
-                payload = {
-                    "quote": {
-                    "id": st.session_state.ticketDf['Purchase_Order'].values[0],
-                    "incurred_description": str(st.session_state.workDesDf["Incurred"].get(0)),
-                    "proposed_description": str(st.session_state.workDesDf["Proposed"].get(0)),
-                    "ready": True,
-                    "incurred_trip_charge": st.session_state.trip_charge_df.loc[tripIncurredmask,'EXTENDED'].sum(), 
-                    "proposed_trip_charge": st.session_state.trip_charge_df.loc[tripProposedmask,'EXTENDED'].sum(), 
-                    "total": total_price,
-                    "make": "string",
-                    "model": "string",
-                    "serial_number": "string",
-                    "simple_quote": True,
-                    "document": pdf_base64,
-                    "document_cache": "string",
-                    "incurred_time" : st.session_state.labor_df.loc[laborIncurredmask,'EXTENDED'].sum(),
-                    "proposed_time" : st.session_state.labor_df.loc[laborProposedmask,'EXTENDED'].sum(),
-                    "incurred_material": st.session_state.parts_df.loc[partsIncurredmask,'EXTENDED'].sum(),
-                    "proposed_material": st.session_state.parts_df.loc[partsProposedmask,'EXTENDED'].sum() +st.session_state. miscellaneous_charges_df['EXTENDED'].sum() + st.session_state.materials_and_rentals_df['EXTENDED'].sum() + st.session_state.subcontractor_df['EXTENDED'].sum(),
-                    "tax_total": total_price_with_tax,
-                    "approval_document_file": "string"
-                }
-                }
-                st.write(payload)
                 checkout(st.session_state.ticketDf['Purchase_Order'].values[0])
                 submitFmQuotes(pdf_base64, st.session_state.ticketDf['Purchase_Order'].values[0], str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df, total_price, total_price_with_tax)
                 st.experimental_rerun()
