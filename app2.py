@@ -913,10 +913,10 @@ def mainPage():
                 with col1:
                     if st.button("Save"):        
                         savetime = datetime.now()
-                        st.write(st.session_state.miscellaneous_charges_df, st.session_state.miscellaneous_charges_df["Description"])
+                        st.write(st.session_state.miscellaneous_charges_df, st.session_state.miscellaneous_charges_df["Description"].get(0))
                         updateAll(st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df)
                         st.write(st.session_state.ticketN, st.session_state.editable, st.session_state.NTE_Quote, savetime, "1900-01-01 00:00:00.000",  "1900-01-01 00:00:00.000", st.session_state.ticketDf["BranchName"].get(0), "save")
-                        updateParent(st.session_state.ticketN, st.session_state.editable, st.session_state.NTE_Quote, savetime, "1900-01-01 00:00:00.000",  "1900-01-01 00:00:00.000", st.session_state.ticketDf["BranchName"].get(0), "save")
+                        updateParent(st.session_state.ticketDf["BranchName"].get(0), "save")
                         st.success("Successfully updated to database!")      
                     incol1, incol2, incol3 = st.columns([1,1,1])
                     with incol1:
