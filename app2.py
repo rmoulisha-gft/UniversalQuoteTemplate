@@ -1178,8 +1178,8 @@ def mainPage():
             if st.sidebar.button("Submit to FMDash"):
                 laborIncurredmask = (st.session_state.labor_df["Incurred/Proposed"] == "Incurred")
                 laborProposedmask = (st.session_state.labor_df["Incurred/Proposed"] == "Proposed")
-                tripIncurredmask = (st.session_state.trip_df["Incurred/Proposed"] == "Incurred")
-                tripProposedmask = (st.session_state.trip_df["Incurred/Proposed"] == "Proposed")
+                tripIncurredmask = (st.session_state.trip_charge_df["Incurred/Proposed"] == "Incurred")
+                tripProposedmask = (st.session_state.trip_charge_df["Incurred/Proposed"] == "Proposed")
                 partsIncurredmask = (st.session_state.parts_df["Incurred/Proposed"] == "Incurred")
                 partsProposedmask = (st.session_state.parts_df["Incurred/Proposed"] == "Proposed")
 
@@ -1189,8 +1189,8 @@ def mainPage():
                     "incurred_description": incurred,
                     "proposed_description": proposed,
                     "ready": True,
-                    "incurred_trip_charge": st.session_state.trip_df.loc[tripIncurredmask,'EXTENDED'].sum(), 
-                    "proposed_trip_charge": st.session_state.trip_df.loc[tripProposedmask,'EXTENDED'].sum(), 
+                    "incurred_trip_charge": st.session_state.trip_charge_df.loc[tripIncurredmask,'EXTENDED'].sum(), 
+                    "proposed_trip_charge": st.session_state.trip_charge_df.loc[tripProposedmask,'EXTENDED'].sum(), 
                     "total": total_price,
                     "make": "string",
                     "model": "string",
@@ -1201,7 +1201,7 @@ def mainPage():
                     "incurred_time" : st.session_state.labor_df.loc[laborIncurredmask,'EXTENDED'].sum(),
                     "proposed_time" : st.session_state.labor_df.loc[laborProposedmask,'EXTENDED'].sum(),
                     "incurred_material": st.session_state.parts_df.loc[partsIncurredmask,'EXTENDED'].sum(),
-                    "proposed_material": st.session_state.parts_df.loc[partsProposedmask,'EXTENDED'].sum() +st.session_state. misc_df['EXTENDED'].sum() + st.session_state.materials_df['EXTENDED'].sum() + st.session_state.sub_df['EXTENDED'].sum(),
+                    "proposed_material": st.session_state.parts_df.loc[partsProposedmask,'EXTENDED'].sum() +st.session_state. miscellaneous_charges_df['EXTENDED'].sum() + st.session_state.materials_and_rentals_df['EXTENDED'].sum() + st.session_state.subcontractor_df['EXTENDED'].sum(),
                     "tax_total": total_price_with_tax,
                     "approval_document_file": "string"
                 }
