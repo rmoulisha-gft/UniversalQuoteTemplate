@@ -67,7 +67,7 @@ def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip
         "proposed_time" : labor_df.loc[laborProposedmask,'EXTENDED'].sum(),
         "incurred_material": parts_df.loc[partsIncurredmask,'EXTENDED'].sum(),
         "proposed_material": parts_df.loc[partsProposedmask,'EXTENDED'].sum() + misc_df['EXTENDED'].sum() + materials_df['EXTENDED'].sum() + sub_df['EXTENDED'].sum(),
-        "tax_total": taxTotal,
+        "tax_total": taxTotal - total,
         "approval_document_file": "string"
     }
     }
