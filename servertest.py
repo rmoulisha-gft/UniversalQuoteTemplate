@@ -325,7 +325,7 @@ def getParent(branchName):
     dataset = cursor.fetchall()
     data = [list(row) for row in dataset]
     parentDf = pd.DataFrame(data, columns=["TicketID", "Status", "NTE_QUOTE", "Editable", "Insertdate", "Approvedate", "Declinedate"])
-    mapping = {1: 'QUOTE', 2: 'NTE'}
+    mapping = {1: 'QUOTE', 3: 'NTE'}
     parentDf['NTE_QUOTE'] = parentDf['NTE_QUOTE'].replace(mapping)
     conn.close()
     return parentDf
