@@ -714,7 +714,7 @@ def mainPage():
                         elif category == 'Miscellaneous Charges':
                             string_values = [" : "+str(value).rstrip('0').rstrip('.') for value in st.session_state.misc_ops_df['Fee_Amount']]
                             concatenated_values = [description + value for description, value in zip(st.session_state.misc_ops_df['Fee_Charge_Type'], string_values)]    
-                            with st.form(key='Misc_form', clear_on_submit=True):
+                            with st.form(key='Misc_form'):
                                 st.session_state.miscellaneous_charges_df = st.data_editor(
                                     st.session_state.miscellaneous_charges_df,
                                     column_config={
@@ -760,6 +760,14 @@ def mainPage():
                                         unit_price_values = st.session_state.miscellaneous_charges_df.loc[mask,'UNIT Price']
                                         st.session_state.miscellaneous_charges_df.loc[mask, 'EXTENDED'] = np.array(qty_values[mask], dtype=float) * np.array(unit_price_values[mask], dtype=float)
                                         st.session_state.miscellaneous_charges_df = st.session_state.miscellaneous_charges_df.dropna()
+                                        if st.session_state.get("miscellaneous_charges_df", None) is None or st.session_state.miscellaneous_charges_df.empty:
+                                            misc_charges_data = {
+                                                'Description': [None],
+                                                'QTY': [None],
+                                                'UNIT Price': [None],
+                                                'EXTENDED': [None]
+                                            }
+                                        st.session_state.miscellaneous_charges_df = pd.DataFrame(misc_charges_data)
                                         st.experimental_rerun()
                                     category_total = st.session_state.miscellaneous_charges_df['EXTENDED'].sum()
                                     category_totals[category] = category_total
