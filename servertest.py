@@ -334,7 +334,7 @@ def updateParent(ticket, editable, ntequote, savetime, approved, declined, branc
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
     if(ntequote=="NTE"):
-        ntequote = 2
+        ntequote = 3
     else:
         ntequote = 1
 
