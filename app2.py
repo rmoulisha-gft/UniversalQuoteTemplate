@@ -1370,9 +1370,9 @@ def main():
             st.session_state.ticketN = st.text_input("Enter ticket number:")
             params = st.experimental_get_query_params()
             if params['TicketID']:
-                st.session_state.ticketN = params['TicketID']
                 st.write(params['TicketID'])
                 st.write(params)
+                st.write("st.session_state.ticketN = params['TicketID']")
             if(st.session_state.ticketN):
                 st.experimental_rerun()
     else:
