@@ -1371,6 +1371,8 @@ def main():
             params = st.experimental_get_query_params()
             if params['TicketID']:
                 st.session_state.ticketN = params['TicketID']
+                st.write(params['TicketID'])
+                st.write(params)
             if(st.session_state.ticketN):
                 st.experimental_rerun()
     else:
