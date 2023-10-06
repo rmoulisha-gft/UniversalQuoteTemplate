@@ -93,6 +93,7 @@ def refresh():
     for var_name in state_variables:
         st.session_state[var_name] = None
     st.session_state.edit = False
+    st.experimental_set_query_params()
     st.experimental_rerun()
 def mainPage():
     if "labor_df" not in st.session_state:
@@ -1370,7 +1371,6 @@ def main():
             st.session_state.ticketN = st.text_input("Enter ticket number:")
             params = st.experimental_get_query_params()
             if params['TicketID']:
-                st.write(params['TicketID'][0])
                 st.session_state.ticketN = params['TicketID'][0]
             if(st.session_state.ticketN):
                 st.experimental_rerun()
