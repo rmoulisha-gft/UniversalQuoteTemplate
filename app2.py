@@ -1368,6 +1368,9 @@ def main():
             # if(not st.session_state.refresh_button):
             #     st.session_state.refresh_button = st.sidebar.button("Refresh")
             st.session_state.ticketN = st.text_input("Enter ticket number:")
+            params = st.experimental_get_query_params()
+            if params['TicketID']:
+                st.session_state.ticketN = params['TicketID']
             if(st.session_state.ticketN):
                 st.experimental_rerun()
     else:
