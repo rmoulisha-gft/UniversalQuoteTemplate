@@ -96,8 +96,6 @@ def techPage():
     image_height = 200
     resized_image = image.resize((int(image_height * image.width / image.height), image_height))
 
-    st.subheader("Main Page")
-    st.write("Welcome to the main page of the Fee Charge Types application.")
     # try:
     if 'ticketN' in st.session_state and st.session_state.ticketN:
         if st.session_state.ticketDf is None:
@@ -133,37 +131,7 @@ def techPage():
             col1, col2 = st.sidebar.columns(2)
             
             col1, col2 = st.columns((2,1))
-            df_left = pd.DataFrame(left_data)
-            left_table_styles = [
-                {'selector': 'table', 'props': [('text-align', 'left'), ('border-collapse', 'collapse')]},
-                {'selector': 'th, td', 'props': [('padding', '8px'), ('border', '1px solid black')]}
-            ]
-            df_left_styled = df_left.style.set_table_styles(left_table_styles)
-
-            col1.dataframe(df_left_styled, hide_index=True)
-            col2.image(resized_image, width=300)
-
             # Ticket Info table
-            data = {
-                'Site': st.session_state.ticketDf['LOC_LOCATNNM'],
-                'Ticket #': st.session_state.ticketN,
-                'Address': st.session_state.ticketDf['LOC_Address'] + " " + st.session_state.ticketDf['CITY'] + " " +
-                        st.session_state.ticketDf['STATE'] + " " + st.session_state.ticketDf['ZIP']
-            }
-
-            data1 = {
-                'PO #': st.session_state.ticketDf['Purchase_Order'],
-                'Date': formatted_date,
-                'BranchEmail': st.session_state.ticketDf['MailDispatch'], 
-                'Customer': st.session_state.ticketDf['LOC_CUSTNMBR']
-            }
-
-            df_info1 = pd.DataFrame(data)
-            df_info2 = pd.DataFrame(data1)
-
-            st.subheader("Ticket Info")
-            st.dataframe(df_info1, hide_index=True)
-            st.dataframe(df_info2, hide_index=True)
             if st.session_state.get("miscellaneous_charges_df", None) is None or st.session_state.miscellaneous_charges_df.empty:
                 misc_charges_data = {
                     'Description': [None],
@@ -190,7 +158,6 @@ def techPage():
                     'EXTENDED': [None]
                 }
                 st.session_state.subcontractor_df = pd.DataFrame(subcontractor_data)
-            st.write("**UNLESS SPECIFICALLY NOTED, THIS PROPOSAL IS VALID FOR 30 DAYS FROM THE DATE ABOVE**")
             total_price = 0.0
                   
             categories = ['Labor', 'Trip Charge', 'Parts', 'Miscellaneous Charges', 'Materials and Rentals', 'Subcontractor']
@@ -204,20 +171,6 @@ def techPage():
                 else:
                     category_table_data.append([f"{category} Total", 0])
             taxRate = st.session_state.ticketDf['Tax_Rate']
-            total_price_with_tax = total_price * (1 + taxRate / 100.0)
-
-            right_column_content = f"""
-            **Price (Pre-Tax)**
-            ${total_price:.2f}
-
-            **Estimated Sales Tax**
-            ${total_price*taxRate/100:.2f}
-
-            **Total (including tax)**
-            ${total_price_with_tax:.2f}
-            """
-            col2.dataframe(pd.DataFrame(category_table_data, columns=["Category", "Total"]), hide_index=True)
-            col2.write(right_column_content)
 
             input_pdf = PdfReader(open('input.pdf', 'rb'))
             buffer = io.BytesIO()
