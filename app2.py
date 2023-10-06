@@ -337,7 +337,8 @@ def techPage():
 
                     category_total = np.round(table_df['EXTENDED'].sum(), 2)
                     c.rect(17, y, block_width, row_height)
-                    c.drawRightString(block_width + 12, y + 5, f"{category} Total: {category_total}")
+                    st.write(category, str(category))
+                    c.drawRightString(block_width + 12, y + 5, f"{str(category)} Total: {category_total}")
                     y -= row_height
 
                     if y < margin_bottom:
