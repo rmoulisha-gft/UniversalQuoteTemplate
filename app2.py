@@ -556,7 +556,6 @@ def main():
             if(st.session_state.ticketN):
                 st.experimental_rerun()
     else:
-    else:
         techPage()
 
 if __name__ == "__main__":
