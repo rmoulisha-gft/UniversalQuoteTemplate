@@ -211,13 +211,16 @@ def techPage():
             """
 
             col1, col2 = st.columns([1, 1])
-            col1.write(left_column_content)
-            total_price = 0.0
-            taxRate = col1.number_input("Please input a tax rate in % (by 2 decimal)",
-                                    value=float(st.session_state.ticketDf['Tax_Rate']),
-                                    disabled=True,
-                                    format="%.2f",
-                                    key="tax_rate_input")
+            with col1: 
+                st.write(left_column_content)
+                total_price = 0.0
+                taxRate = st.number_input("Please input a tax rate in % (by 2 decimal)",
+                                        value=float(st.session_state.ticketDf['Tax_Rate']),
+                                        disabled=True,
+                                        format="%.2f",
+                                        key="tax_rate_input")
+                incol1, incol2, incol3 = st.columns([1,1,1])     
+                
             
             category_table_data = []
             for category in categories:
@@ -450,7 +453,6 @@ def techPage():
             pdf_content = merged_buffer.read()
             pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
             
-            incol1, incol2, incol3 = st.columns([1,1,1])     
             if incol2.button("Close PDF"):
                 incol2.text("PDF Closed")
             if(incol1.button("Open PDF")):
