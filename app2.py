@@ -111,7 +111,8 @@ def techPage():
             else:
                 st.session_state.workDesDf = workDes
             st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_and_rentals_df, st.session_state.subcontractor_df = getAllTicket(ticket=st.session_state.ticketN)
-        if len(st.session_state.ticketDf)==0:
+        if st.sidebar.button("goBack", key="5"):
+            refresh()if len(st.session_state.ticketDf)==0:
             st.error("Please enter a ticket number or check the ticket number again")
         else:
             parentDf = getParentByTicket(st.session_state.ticketN)
