@@ -88,7 +88,7 @@ def refresh():
     ]
     for var_name in state_variables:
         st.session_state[var_name] = None
-    st.session_state.edit = False
+    st.experimental_set_query_params()
     st.experimental_rerun()
 def techPage():
     if "labor_df" not in st.session_state:
@@ -548,16 +548,13 @@ def main():
                     hide_index=True,
                     key="parent"
                     )
-                # NTEQuoteQue()
-            # if(not st.session_state.refresh_button):
-            #     st.session_state.refresh_button = st.sidebar.button("Refresh")
             st.session_state.ticketN = st.text_input("Enter ticket number:")
             params = st.experimental_get_query_params()
             if params and params['TicketID']:
-                st.session_state.ticketN = params['TicketID']
-                st.write(params['TicketID'])
+                st.session_state.ticketN = params['TicketID'][0]
             if(st.session_state.ticketN):
                 st.experimental_rerun()
+    else:
     else:
         techPage()
 
