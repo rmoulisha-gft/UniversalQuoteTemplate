@@ -2,11 +2,11 @@ import streamlit as st
 import pandas as pd
 import requests
 from PIL import Image
-from streamlit_float import *
+# from streamlit_float import *
 import io
 import base64
 import random
-from streamlit.components.v1 import html
+# from streamlit.components.v1 import html
 import time
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
@@ -1352,36 +1352,37 @@ def pricing():
 
 def main():
     st.set_page_config("Universal Quote Template", layout="wide")
-    float_init()
-    button_container = st.container()
+    # float_init()
+    # button_container = st.container()
 
-    with button_container:
-        if st.session_state.show:
-            if st.button("⭳", type="primary"):
-                st.session_state.show = False
-                st.experimental_rerun()
-        else:
-            if st.button("⭱", type="secondary"):
-                st.session_state.show = True
-                st.experimental_rerun()
+    # with button_container:
+    #     if st.session_state.show:
+    #         if st.button("⭳", type="primary"):
+    #             st.session_state.show = False
+    #             st.experimental_rerun()
+    #     else:
+    #         if st.button("⭱", type="secondary"):
+    #             st.session_state.show = True
+    #             st.experimental_rerun()
 
-    if st.session_state.show:
-        vid_y_pos = "0px"
-        button_css = float_css_helper(width="2.2rem", right="4rem", bottom="400px", transition=0)
-    else:
-        vid_y_pos = "-412px"
-        button_css = float_css_helper(width="2.2rem", right="4rem", bottom="1rem", transition=0)
+    # if st.session_state.show:
+    #     vid_y_pos = "0px"
+    #     button_css = float_css_helper(width="2.2rem", right="4rem", bottom="400px", transition=0)
+    # else:
+    #     vid_y_pos = "-412px"
+    #     button_css = float_css_helper(width="2.2rem", right="4rem", bottom="1rem", transition=0)
 
-    button_container.float(button_css)
-    float_box(
-        '<iframe width="560" height="400" src="https://htmlpreview.github.io/?https://github.com/Charlieletscode/Personal-Web/blob/main/D.html" title="Streamlit App" style="background-color: white;"></iframe>',
-        width="29rem",
-        height="400px",
-        right="4rem",
-        bottom=vid_y_pos,
-        css="padding: 0; transition-property: all; transition-duration: .5s; transition-timing-function: cubic-bezier(0, 1, 0.5, 1);",
-        shadow=12
-    )
+    # button_container.float(button_css)
+    # float_box(
+    # 'HELP FILE COMING SOON',
+    # width="29rem",
+    # height="400px",
+    # right="4rem",
+    # bottom=vid_y_pos,
+    # css="padding: 0; background-color: white; transition-property: all; transition-duration: .5s; transition-timing-function: cubic-bezier(0, 1, 0.5, 1);",
+    # shadow=12
+    # )
+
     st.markdown(
         """
        <style>
