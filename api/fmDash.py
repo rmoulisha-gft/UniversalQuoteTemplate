@@ -7,14 +7,14 @@ token = os.environ.get("fmDashtoken")
 # 230726-0289
 
 def checkout(work_order_id):
-    url = f"https://fmdashboard-staging.herokuapp.com/api/work_orders/{work_order_id}/checkout?token={token}"
+    url = f"https://app.fmdashboard.com/api/work_orders/{work_order_id}/checkout?token={token}"
     headers = {
         "Content-Type": "application/json",
     }
 
     payload = {
         "checkout": {
-            "description": "This is the description of my checkout. Thanks!",
+            "description": "Quote Submitted",
             "status": "150",
             "resolution": "Repaired"
         }
@@ -24,7 +24,7 @@ def checkout(work_order_id):
     # print(response.text, response.status_code)
 
 def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip_df, parts_df, misc_df, materials_df, sub_df, total, taxTotal):
-    url = f"https://fmdashboard-staging.herokuapp.com/api/work_orders/{work_order_id}/checkout?token={token}"
+    url = f"https://app.fmdashboard.com/api/work_orders/{work_order_id}/checkout?token={token}"
     headers = {
         "Content-Type": "application/json",
     }
@@ -39,7 +39,7 @@ def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip
     payload_json = json.dumps(payload)
     response = requests.post(url, headers=headers, data=payload_json)
     # print(response.text, response.status_code)
-    api_url = f"https://fmdashboard-staging.herokuapp.com/api/work_orders/{work_order_id}/quotes?token={token}"
+    api_url = f"https://app.fmdashboard.com/api/work_orders/{work_order_id}/quotes?token={token}"
 
     laborIncurredmask = (labor_df["Incurred/Proposed"] == "Incurred")
     laborProposedmask = (labor_df["Incurred/Proposed"] == "Proposed")
