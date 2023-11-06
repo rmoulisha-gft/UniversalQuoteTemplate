@@ -2,13 +2,12 @@ import streamlit as st
 import pandas as pd
 import requests
 from PIL import Image
-# from streamlit_float import *
 import io
 import base64
 import random
-# from streamlit.components.v1 import html
 import time
 from io import BytesIO
+from __init__ import *
 from reportlab.lib.pagesizes import letter
 from servertest import getAllPrice
 from servertest import updateAll
@@ -334,18 +333,16 @@ def mainPage():
                                         newLabordf.loc[qty_mask, 'QTY'] = np.array(qty_values[qty_mask]) * np.array(hours_values[qty_mask])
                                         description_values = newLabordf['Description']
                                         rate_mask = description_values.notnull()
-                                        newLabordf.loc[rate_mask, 'Hourly Rate'] = description_values[rate_mask].apply(lambda x: float(re.search(r'(\d+(\.\d+)?)', x).group()))
+                                        newLabordf.loc[rate_mask, 'Hourly Rate'] = description_values[rate_mask].apply(lambda x: re.search(r'(\d+(\.\d+)?)', x).group() if re.search(r'(\d+(\.\.\d+)?)', x) else 0)
                                         extended_mask = qty_mask & rate_mask
-                                        qty_values = np.array(newLabordf.loc[qty_mask, 'QTY'], dtype=float)
-                                        hourly = np.array(newLabordf.loc[rate_mask, 'Hourly Rate'], dtype=float)
+                                        qty_values = pd.to_numeric(newLabordf.loc[qty_mask, 'QTY'], errors='coerce')
+                                        hourly = pd.to_numeric(newLabordf.loc[rate_mask, 'Hourly Rate'], errors='coerce')
                                         rounded_extended_values = np.round(np.array(qty_values) * np.array(hourly), 2)
                                         newLabordf.loc[extended_mask, 'EXTENDED'] = rounded_extended_values
                                         newLabordf = newLabordf.dropna()
                                         st.session_state.labor_df = pd.concat([st.session_state.labor_df, newLabordf], ignore_index=True)
-                                        st.empty()
                                         st.experimental_rerun()
                                     category_totals[category] = newLabordf['EXTENDED'].sum() + category_total
-                                    st.session_state.labor_df.dropna(how='all', inplace=True)
                             if not st.session_state.labor_df.empty:
                                 st.write("Archived Labor (Delete row when necessary please dont add rows)")
                                 st.session_state.labor_df = st.data_editor(
@@ -514,22 +511,18 @@ def mainPage():
                                 submit_button = col2.form_submit_button(label='Submit')
                                 if not newTripdf.empty:
                                     if submit_button:
+                                        qty_mask = newTripdf['QTY'].notnull()
                                         desc_mask = newTripdf['Description'].notnull()
-                                        qty_mask = newTripdf["QTY"].notnull()
-                                        qty_values = newTripdf.loc[qty_mask,"QTY"]
-                                        description_values = newTripdf.loc[desc_mask,"Description"]
+                                        qty_values = newTripdf.loc[qty_mask, 'QTY']
+                                        descriptions = newTripdf.loc[desc_mask,'Description']
                                         incurred_mask = newTripdf['Incurred/Proposed'].notnull()
-                                        rate_mask = desc_mask & newTripdf['UNIT Price'].isnull() 
                                         newTripdf = newTripdf[incurred_mask & qty_mask & desc_mask]
-                                        newTripdf.loc[rate_mask, 'UNIT Price'] = description_values[rate_mask].apply(lambda x: float(re.search(r'(\d+(\.\d+)?)', x).group()))
-                                        rate_mask = newTripdf['UNIT Price'].notnull()
-                                        extended_mask = qty_mask & rate_mask
-                                        qty_values = np.array(newTripdf.loc[rate_mask, 'QTY'], dtype=float)
-                                        unitPrice = np.array(newTripdf.loc[rate_mask, 'UNIT Price'], dtype=float)
-                                        extended_values = np.array(qty_values) * np.array(unitPrice)
-                                        rounded_extended_values = np.round(extended_values, 2)
-                                        newTripdf.loc[extended_mask, 'EXTENDED'] = rounded_extended_values
-                                        newTripdf = newTripdf.dropna()
+                                        rate_mask = newTripdf['UNIT Price'].isnull()
+                                        newTripdf.loc[rate_mask, 'UNIT Price'] = newTripdf.loc[rate_mask, 'Description'].apply(lambda x: re.search(r'(\d+(\.\d+)?)', x).group() if re.search(r'(\d+(\.\.\d+)?)', x) else 0)
+                                        unit_mask = newTripdf['UNIT Price'].isnull()
+                                        if newTripdf['EXTENDED'].isnull().any():
+                                            extended_mask = newTripdf['EXTENDED'].isnull()
+                                            newTripdf.loc[extended_mask, 'EXTENDED'] = newTripdf.loc[extended_mask, 'UNIT Price'] * qty_values
                                         st.session_state.trip_charge_df = pd.concat([st.session_state.trip_charge_df, newTripdf], ignore_index=True)
                                         st.experimental_rerun()
                                     category_totals[category] = newTripdf['EXTENDED'].sum() + category_total
@@ -585,7 +578,7 @@ def mainPage():
                             category_total = 0
                             # new
                             if st.session_state.pricingDf is None or st.session_state.pricingDf.empty:
-                                st.error("Parts not found. Please enter a valid Part Id or Part Desc.")
+                                st.error("Please enter a valid Part Id or Part Desc.")
                             else:
                                 with st.form(key='parts_form', clear_on_submit=True):
                                     st.write("New Parts")
@@ -937,15 +930,17 @@ def mainPage():
                 for category in categories:
                     table_df = getattr(st.session_state, f"{category.lower().replace(' ', '_').replace('/', '_')}_df")
                     if not table_df.empty and 'EXTENDED' in table_df.columns:
+                        table_df['EXTENDED'] = pd.to_numeric(table_df['EXTENDED'], errors='coerce')
                         category_total = table_df['EXTENDED'].sum()
+                        category_total = round(category_total,2)
                         category_totals[category] = category_total
                         current_title = f"{category} Total: ${category_totals[category]}"
-                        num_spaces = desired_width - len(current_title)
-                        expanderTitle = f"{category}{' &nbsp;' * num_spaces}Total: ${category_totals[category]}"
+                        num_spaces = desired_width - len(current_title) - 3
+                        expanderTitle = f"{category}{' &nbsp; ' * num_spaces}Total: ${category_totals[category]}"
                     else:
                         current_title = f"{category} Total : $0"
                         num_spaces = desired_width - len(current_title)
-                        expanderTitle = f"{category}{' &nbsp;' * num_spaces}Total : $0"
+                        expanderTitle = f"{category}{' &nbsp; ' * num_spaces}Total : $0"
                 
                     
 
@@ -1352,37 +1347,36 @@ def pricing():
 
 def main():
     st.set_page_config("Universal Quote Template", layout="wide")
-    # float_init()
-    # button_container = st.container()
+    float_init()
+    button_container = st.container()
 
-    # with button_container:
-    #     if st.session_state.show:
-    #         if st.button("⭳", type="primary"):
-    #             st.session_state.show = False
-    #             st.experimental_rerun()
-    #     else:
-    #         if st.button("⭱", type="secondary"):
-    #             st.session_state.show = True
-    #             st.experimental_rerun()
+    with button_container:
+        if st.session_state.show:
+            if st.button("⭳", type="primary"):
+                st.session_state.show = False
+                st.experimental_rerun()
+        else:
+            if st.button("⭱", type="secondary"):
+                st.session_state.show = True
+                st.experimental_rerun()
 
-    # if st.session_state.show:
-    #     vid_y_pos = "0px"
-    #     button_css = float_css_helper(width="2.2rem", right="4rem", bottom="400px", transition=0)
-    # else:
-    #     vid_y_pos = "-412px"
-    #     button_css = float_css_helper(width="2.2rem", right="4rem", bottom="1rem", transition=0)
+    if st.session_state.show:
+        vid_y_pos = "0px"
+        button_css = float_css_helper(width="2.2rem", right="4rem", bottom="400px", transition=0)
+    else:
+        vid_y_pos = "-412px"
+        button_css = float_css_helper(width="2.2rem", right="4rem", bottom="1rem", transition=0)
 
-    # button_container.float(button_css)
-    # float_box(
-    # 'HELP FILE COMING SOON',
-    # width="29rem",
-    # height="400px",
-    # right="4rem",
-    # bottom=vid_y_pos,
-    # css="padding: 0; background-color: white; transition-property: all; transition-duration: .5s; transition-timing-function: cubic-bezier(0, 1, 0.5, 1);",
-    # shadow=12
-    # )
-
+    button_container.float(button_css)
+    float_box(
+    'HELP FILE COMING SOON',
+    width="29rem",
+    height="400px",
+    right="10px",
+    bottom=vid_y_pos,
+    css="padding: 0; background-color: white; transition-property: all; transition-duration: .5s; transition-timing-function: cubic-bezier(0, 1, 0.5, 1);",
+    shadow=12
+    )
     st.markdown(
         """
        <style>
