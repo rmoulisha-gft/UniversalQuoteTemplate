@@ -1258,7 +1258,7 @@ def mainPage():
                     st.download_button("Download PDF", merged_buffer, file_name=f'{st.session_state.ticketN}-quote.pdf', mime='application/pdf')
                     st.markdown(pdf_display, unsafe_allow_html=True)
                     
-        if len(st.session_state.ticketDf) != 0 and "MAJ" in st.session_state.ticketDf['LOC_CUSTNMBR'].get(0):
+        if len(st.session_state.ticketDf)!=0 and st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MAJ0001":
             if st.sidebar.button("Submit to FMDash"):
                 checkout(st.session_state.ticketDf['Purchase_Order'].values[0])
                 submitFmQuotes(pdf_base64, st.session_state.ticketDf['Purchase_Order'].values[0], str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_non_stock_and_rentals_df, st.session_state.subcontractor_df, total_price, total_price_with_tax)
