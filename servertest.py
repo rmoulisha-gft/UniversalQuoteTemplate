@@ -89,6 +89,7 @@ def getAllPrice(ticketN):
     cursor.close()
     conn.close()
     return ticketDf, LRatesDf, TRatesDf, misc_ops_df
+
 def getDesc(ticket):
     conn_str = f"DRIVER={SQLaddress};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
     conn = pyodbc.connect(conn_str)
@@ -398,3 +399,17 @@ def updateParent(ticket, editable, ntequote, savetime, approved, declined, branc
     
     cursor.close()
     conn.close()
+
+
+def getVerisaeCreds(ticket):
+    conn_str = f"DRIVER={SQLaddress};SERVER={server};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes;"
+    conn = pyodbc.connect(conn_str)
+    cursor = conn.cursor()
+    
+    select_query = '''EXEC [GFT].[dbo].[MR_Univ_User_Info]  @ticket_no = ?'''
+    cursor.execute(select_query, (ticket))
+    dataset = cursor.fetchall()
+    data = [list(row) for row in dataset]
+    credsDf = pd.DataFrame(data, columns=["Purchase_Order", "AppointmentID", "Divisions", "Username", "Password"])
+    conn.close()
+    return (credsDf["Username"], credsDf["Password"])

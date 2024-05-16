@@ -30,7 +30,7 @@ import re
 from api.fmDash import submitFmQuotes
 from api.fmDash import checkout
 from api.verisae import submitQuoteVerisae
-from api.circleK import wo_cost_information
+from api.circleK import circleK_wo_cost_information
 from reportlab.graphics.renderPM import PMCanvas
 from decimal import Decimal
 from reportlab.pdfbase.pdfmetrics import registerFont
@@ -1261,28 +1261,37 @@ def mainPage():
         if len(st.session_state.ticketDf) != 0 and "MAJ" in st.session_state.ticketDf['LOC_CUSTNMBR'].get(0):
             if st.sidebar.button("Submit to FMDash"):
                 checkout(st.session_state.ticketDf['Purchase_Order'].values[0])
-                submitFmQuotes(pdf_base64, st.session_state.ticketDf['Purchase_Order'].values[0], str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_non_stock_and_rentals_df, st.session_state.subcontractor_df, total_price, total_price_with_tax)
+                status = submitFmQuotes(pdf_base64, st.session_state.ticketDf['Purchase_Order'].values[0], str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_non_stock_and_rentals_df, st.session_state.subcontractor_df, total_price, total_price_with_tax)
+                st.sidebar.error(status)
+                st.sidebar.error("Please log into customer portal to assess ticket. The page will refresh in 15 secs")
+                time.sleep(15)
                 st.experimental_rerun()
 
         if(len(st.session_state.ticketDf)!=0 and st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "CIR0001"):
             if st.sidebar.button("Submit to CircleK"):
-                wo_cost_information(category_totals.get("Labor", 0),
+                status = circleK_wo_cost_information(category_totals.get("Labor", 0),
                 category_totals.get("Trip Charge", 0),
                 category_totals.get("Parts", 0),
                 category_totals.get("Miscellaneous Charges", 0),
                 category_totals.get("Materials, Non Stock and Rentals", 0),
                 category_totals.get("Subcontractor", 0),
                 taxRate, st.session_state.ticketDf['Purchase_Order'])
+                st.sidebar.error(status)
+                st.sidebar.error("Please log into customer portal to assess ticket. The page will refresh in 15 secs")
+                time.sleep(15)
                 st.experimental_rerun()
         
-        if(len(st.session_state.ticketDf)!=0 and st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MUR0001"):
+        if(len(st.session_state.ticketDf)!=0 and (st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MUR0001" or st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "GPM0001" or st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "HER0008")):
             if st.sidebar.button("Submit to Verisae"):
-                submitQuoteVerisae(st.session_state.ticketDf['CUST_NAME'].get(0), st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)) + str(st.session_state.workDesDf["Proposed"].get(0)), 
+                status = submitQuoteVerisae(st.session_state.ticketDf['CUST_NAME'].get(0), st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)) + str(st.session_state.workDesDf["Proposed"].get(0)), 
                                    category_totals.get("Trip Charge", 0),
                                    category_totals.get("Parts", 0),
                                    category_totals.get("Labor", 0),
                                    category_totals.get("Miscellaneous Charges", 0),
-                                   taxRate, st.session_state.ticketDf['Purchase_Order'])
+                                   taxRate, st.session_state.ticketDf['Purchase_Order'][0].strip())
+                st.sidebar.error(status)
+                st.sidebar.error("Please log into customer portal to assess ticket. The page will refresh in 15 secs")
+                time.sleep(15)
                 st.experimental_rerun()
 
         # except Exception as e:

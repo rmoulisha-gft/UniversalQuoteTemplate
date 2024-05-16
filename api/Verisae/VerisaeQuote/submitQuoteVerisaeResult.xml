@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<WorkOrderActions_response updateDataBase="true" truncateComments="false" inlineWarnings="false">
+  <copyright>Verisae, Inc.</copyright>
+  <work_orders>
+    <work_order>
+      <work_order_number>69738324</work_order_number>
+      <wo_actions>
+        <submit_quote>
+          <user_name>aerb</user_name>
+          <description>001 - Arrived on site. Despensers 3/4 were flashing 5721 error. I disabled function code 34. The error went away and pumps came back up and is functional. There was still no alarm sound. Went to another despenser and checked all the function codes and put them on despensers 3/4. Alarm started working but could not get it to stop. I contacted TAC and ran some tests. They said it needs a new door node. Ordered a new door node and disabled function code 34 so the alarm is disabled and the pump is still functional. Will return with parts to fix the alarm. : 0002 - 5-14-2024(JD) Arrived on site and spoke with manager. Installed door node on pump 4 that was ordered. At first pump did not see new door node. After reboot I was able to check software version and it was already in the latest software for door node 4. Problem still continued with alarm. Attempted to change all programming in CC91 but still went into alarm with doors closed. Went through install pamphlet and followed word for word. Everything is set correctly. Made sure trigger switches were closing and opening correctly. Checked all connections and proper function of door nodes. Even changed the cables around on the switches to see if they were hooked up wrong. Found that in CC91 function 37 if I set it to logging only. The pump would not go into alarm. But after closing and then opening again the alarm would go off like it should but when you closed it again the alarm would go back off with doors closed. When I would go back into programming CC91 function would be back on 6 for pump disabled persistent. Tried this several times and same scenario each time. Ordered another door node as only one was ordered so I can swap the other side. Also ordered new cable harness for security in case the cables are bad. Will return to install when parts come in. : </description>
+          <travel>0.0</travel>
+          <parts>450.24</parts>
+          <labor>450.0</labor>
+          <misc>10.0</misc>
+          <manual_tax>8.0</manual_tax>
+          <results>
+            <action_status>EXCEPTION</action_status>
+            <work_order_status>Service Incomplete</work_order_status>
+            <exception_code>202-03</exception_code>
+            <exception_message>This user does not have permission to perform this action</exception_message>
+          </results>
+        </submit_quote>
+      </wo_actions>
+    </work_order>
+  </work_orders>
+</WorkOrderActions_response>

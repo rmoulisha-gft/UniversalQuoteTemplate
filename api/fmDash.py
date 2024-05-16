@@ -22,6 +22,11 @@ def checkout(work_order_id):
     }
     payload_json = json.dumps(payload)
     response = requests.post(url, headers=headers, data=payload_json)
+    # print check session
+    # if response.status_code == 200:
+    #     print("token1 Request successful!")
+    # else:
+    #     print("token1 Request failed with status code:", response.status_code)
     url = f"https://app.fmdashboard.com/api/work_orders/{work_order_id}/checkout?token={token2}"
     headers = {
         "Content-Type": "application/json",
@@ -36,9 +41,13 @@ def checkout(work_order_id):
     }
     payload_json = json.dumps(payload)
     response = requests.post(url, headers=headers, data=payload_json)
+    # if response.status_code == 200:
+    #     print("token2 Request successful!")
+    # else:
+    #     print("token2 Request failed with status code:", response.status_code)
     
-
 def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip_df, parts_df, misc_df, materials_df, sub_df, total, taxTotal):
+    status = 0 
     url = f"https://app.fmdashboard.com/api/work_orders/{work_order_id}/checkout?token={token1}"
     headers = {
         "Content-Type": "application/json",
@@ -88,11 +97,7 @@ def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip
     headers = {}
     response = requests.post(api_url, json=payload, headers=headers)
     if response.status_code == 200:
-        # data = response.json()
-        # print(data)
-        print("Quote submitted. Quote ID:", response.text)
-    else:
-        print("Failed to submit quote. Status code:", response)
+        status = 1
     
     url = f"https://app.fmdashboard.com/api/work_orders/{work_order_id}/checkout?token={token2}"
     headers = {
@@ -143,11 +148,11 @@ def submitFmQuotes(pdf_base64, work_order_id, incurred, proposed, labor_df, trip
     headers = {}
     response = requests.post(api_url, json=payload, headers=headers)
     if response.status_code == 200:
-        # data = response.json()
-        # print(data)
-        print("Quote submitted. Quote ID:", response.text)
+        status = 1
+    if status == 1:
+        return "FmDash quote submit succeeded"
     else:
-        print("Failed to submit quote. Status code:", response)
+        return "FmDash quote submit failed"
 
 
 data = {
