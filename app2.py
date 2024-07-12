@@ -1028,7 +1028,7 @@ def mainPage():
                 else:
                     category_table_data.append([f"{category} Total", 0])
 
-            total_price_with_tax = total_price * (1 + taxRate / 100.0)
+            total_price_with_tax = round(total_price * (1 + taxRate / 100.0), 2)
 
             right_column_content = f"""
             **Price (Pre-Tax)**
@@ -1216,7 +1216,7 @@ def mainPage():
                         first_page = False
                         y = 750
                         
-            total_price_with_tax = total_price * (1 + taxRate / 100.0)
+            total_price_with_tax = round(total_price * (1 + taxRate / 100.0), 2)
             c.rect(17, y, block_width, row_height)
             c.drawRightString(block_width + 12, y + 5, f"Price (Pre-Tax): ${total_price:.2f}")
             y -= row_height
@@ -1280,8 +1280,9 @@ def mainPage():
                 st.sidebar.error("Please log into customer portal to assess ticket. The page will refresh in 15 secs")
                 time.sleep(15)
                 st.experimental_rerun()
-        
-        if(len(st.session_state.ticketDf)!=0 and (st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MUR0001" or st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "GPM0001" or st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "HER0008")):
+
+        # if(len(st.session_state.ticketDf)!=0 and (st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MUR0001" or st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "GPM0001" or st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "HER0008")):
+        if(len(st.session_state.ticketDf)!=0 and (st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "MUR0001" or st.session_state.ticketDf['LOC_CUSTNMBR'].get(0) == "HER0008")):
             if st.sidebar.button("Submit to Verisae"):
                 status = submitQuoteVerisae(st.session_state.ticketDf['CUST_NAME'].get(0), st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)) + str(st.session_state.workDesDf["Proposed"].get(0)), 
                                    category_totals.get("Trip Charge", 0),
@@ -1376,7 +1377,7 @@ def pricing():
 #                     )
 
 def main():
-    st.set_page_config("Universal Quote Template", layout="wide")
+    st.set_page_config("Universal Quote Template")
     float_init()
     button_container = st.container()
 

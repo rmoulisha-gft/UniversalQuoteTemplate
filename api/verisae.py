@@ -6,7 +6,6 @@ import sys
 parent_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(parent_dir)
 from servertest import getVerisaeCreds
-
 # 230823-0151
 
 url = 'https://wbs.verisae.com/DataNett/action/workOrderActions'
@@ -101,31 +100,34 @@ def submitQuoteVerisae(provider, ticketID, des, travelTotal, partsTotal, laborTo
 </WorkOrderActions>
     '''
     (username, password) = getVerisaeCreds(ticketID)
-    data = {                                            
-        'login':username[0],   
-        'password':password[0],
-        'loginPage':"webservice",
-        'xml': xml_request,
-    }
-    response = requests.post(url, headers=headers, data=data)
-    if response.status_code == 200:
-        with open('api/Verisae/VerisaeQuote/submitQuoteVerisaeResult.xml', 'w') as file:
-            file.write(response.text)
-        root = ET.fromstring(response.text)      
-        exception_message_element = root.find(".//exception_message")
-        work_order_status_element = root.find(".//work_order_status")
-        # print(exception_message_element.text, work_order_status_element.text)
-        if work_order_status_element:
+    if username.any() or password.any():
+        data = {                                            
+            'login':username[0],   
+            'password':password[0],
+            'loginPage':"webservice",
+            'xml': xml_request,
+        }
+        response = requests.post(url, headers=headers, data=data)
+        if response.status_code == 200:
+            with open('api/Verisae/VerisaeQuote/submitQuoteVerisaeResult.xml', 'w') as file:
+                file.write(response.text)
+            root = ET.fromstring(response.text)      
             exception_message_element = root.find(".//exception_message")
-            exception_message = f"{exception_message_element.text} workorderstatus: {work_order_status_element.text}"
-            return f"Verisae quote submit failed. WORKORDERNUMBER: {work_order_number} WORKORDERSTATUS: {work_order_status_element.text} EXCEPTION: {exception_message_element.text}"
-        elif exception_message_element or exception_message_element is not None:
-            exception_message = exception_message_element.text
-            return f"Verisae quote submit failed. WORKORDERNUMBER: {work_order_number} WORKORDERSTATUS: {work_order_status_element.text} EXCEPTION: {exception_message_element.text}"
+            work_order_status_element = root.find(".//work_order_status")
+            # print(exception_message_element.text, work_order_status_element.text)
+            if work_order_status_element:
+                exception_message_element = root.find(".//exception_message")
+                exception_message = f"{exception_message_element.text} workorderstatus: {work_order_status_element.text}"
+                return f"Verisae quote submit failed. WORKORDERNUMBER: {work_order_number} WORKORDERSTATUS: {work_order_status_element.text} EXCEPTION: {exception_message_element.text}"
+            elif exception_message_element or exception_message_element is not None:
+                exception_message = exception_message_element.text
+                return f"Verisae quote submit failed. WORKORDERNUMBER: {work_order_number} WORKORDERSTATUS: {work_order_status_element.text} EXCEPTION: {exception_message_element.text}"
+            else:
+                return 'Verisae quote submit successfully.'
         else:
-            return 'Verisae quote submit successfully.'
+            return f'str(response.status_code))+"creds error'
     else:
-        return f'str(response.status_code))+"creds error'
+        return f'EXEC [GFT].[dbo].[MR_Univ_User_Info]  @ticket_no = {ticketID} is empty please take a screenshot and report to IT'
     
     with open('api/Verisae/VerisaeQuote/submitQuoteVerisae.xml', 'w') as file:
         file.write(xml_request)

@@ -1,0 +1,30 @@
+{'quote': {'id': '122133', 
+'incurred_description': 'string', 
+'proposed_description': 'Incurred Workdescription: Please inputProposed Workdescription: Please input',
+ 'ready': True, 
+ 'incurred_trip_charge': 0, 'proposed_trip_charge': 0, 'total': 12.5, 'make': 'string', 'model': 'string', 'serial_number': 'string', 
+ 'simple_quote': False, 'document': 'pdf_base64', 'document_cache': 'string', 'incurred_time': 0, 'proposed_time': 0, 'incurred_material': 0, 'proposed_material': 12.5, 'tax_total': 1.09, 'approval_document_file': 'string'
+    }
+}
+
+{
+    "quote": {
+        "id": 0,
+        "incurred_description": "string",
+        "proposed_description": "string",
+        "ready": true,
+        "incurred_trip_charge": 0,
+        "proposed_trip_charge": 0,
+        "total": 0,
+        "make": "string",
+        "model": "string",
+        "serial_number": "string",
+        "simple_quote": true,
+        "document": "base64 string of PDF",
+        "incurred_time": 0,
+        "incurred_material": 0,
+        "proposed_time": 0,
+        "proposed_material": 0,
+        "tax_total": 0
+    }
+}

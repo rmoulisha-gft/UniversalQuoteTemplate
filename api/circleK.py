@@ -9,8 +9,7 @@ basic = os.environ.get("CircleKkeyBasic")
 if not os.path.exists('api/CircleK/wo_cost_information'):
     os.makedirs('api/CircleK/wo_cost_information')
 
-def circleK_wo_cost_information(labor, trip, parts, misc, materials, sub, taxRate, workorder_id):
-
+def circleK_wo_cost_information(labor, trip, parts, misc, materials, sub, taxRate, Purchase_Order):
     uri = "https://circlek.service-now.com/api/x_nuvo_eam/update_nuvolo_wo/wo_cost_information"
     # url = "https://circlekdev.service-now.com/api/x_nuvo_eam/get_wo_information/open_wo_lists?number=<FWKD1656024>"
     headers = {
@@ -18,14 +17,14 @@ def circleK_wo_cost_information(labor, trip, parts, misc, materials, sub, taxRat
         "Authorization": "Basic "+basic
     }
     total = sum([labor, parts, misc, materials, sub]) * (1 + taxRate / 100.0)
-
+    
     data = {
-    "number": f"{workorder_id}",
+    "number": f"{Purchase_Order.iloc[0].strip()}",
     "u_total_labor_cost_str": f"{total:.2f}",
     "u_total_travel_cost_str": f"{trip * (1 + taxRate / 100.0):.2f}",
     "attachment_link":""
     }
-    response = requests.get(uri, headers=headers, json=data)
+    response = requests.put(uri, headers=headers, json=data)
 
     if response.status_code == 200:
         result = response.json()
