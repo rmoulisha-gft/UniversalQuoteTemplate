@@ -246,7 +246,7 @@ def mainPage():
                             if st.session_state.input_letters != st.session_state.prev_input_letters and len(st.session_state.input_letters) > 0:
                                 st.session_state.pricingDf = getBinddes(st.session_state.input_letters)
                                 st.session_state.prev_input_letters = st.session_state.input_letters
-                        width = 800
+                        width = 700
                         inwidth = 500
                         if category == 'Labor':
                             labor_data = {
@@ -443,7 +443,7 @@ def mainPage():
                                                 "Description",
                                                 help="Description",
                                                 width=inwidth/4,
-                                                options=concatenated_values,
+                                                # options=concatenated_values,
                                             ),
                                             "UNIT Price": st.column_config.NumberColumn(
                                                 "UNIT Price",
@@ -947,7 +947,7 @@ def mainPage():
                 </style>
                 """
                 st.markdown(expander_css, unsafe_allow_html=True)
-                desired_width = 130
+                desired_width = 180
                 for category in categories:
                     table_df = getattr(st.session_state, f"{category.lower().replace(' ', '_').replace('/', '_')}_df")
                     if not table_df.empty and 'EXTENDED' in table_df.columns:
@@ -956,12 +956,15 @@ def mainPage():
                         category_total = round(category_total,2)
                         category_totals[category] = category_total
                         current_title = f"{category} Total: ${category_totals[category]}"
-                        num_spaces = desired_width - len(current_title) - 3
-                        expanderTitle = f"{category}{' &nbsp; ' * num_spaces}Total: ${category_totals[category]}"
+                        # num_spaces = desired_width - len(current_title) - 3
+                        num_spaces = 1
+                        expanderTitle = f"{category}{'&nbsp;' * num_spaces}Total : ${category_totals[category]}"
+                        # print(current_title, len(current_title), num_spaces, len(current_title) + num_spaces)
+                        # print(expanderTitle)
                     else:
                         current_title = f"{category} Total : $0"
                         num_spaces = desired_width - len(current_title)
-                        expanderTitle = f"{category}{' &nbsp; ' * num_spaces}Total : $0"
+                        expanderTitle = f"{category}{'&nbsp;' * num_spaces}Total: $0"
                 
                     
 
@@ -1000,7 +1003,7 @@ def mainPage():
                         updateAll(st.session_state.ticketN, str(st.session_state.workDesDf["Incurred"].get(0)), str(st.session_state.workDesDf["Proposed"].get(0)), st.session_state.labor_df, st.session_state.trip_charge_df, st.session_state.parts_df, st.session_state.miscellaneous_charges_df, st.session_state.materials_non_stock_and_rentals_df, st.session_state.subcontractor_df)
                         updateParent(st.session_state.ticketN, st.session_state.editable, st.session_state.NTE_Quote, savetime, "1900-01-01 00:00:00.000",  "1900-01-01 00:00:00.000", st.session_state.ticketDf["BranchName"].get(0), "save")
                         st.success("Successfully updated to database!")      
-                    incol1, incol2, incol3 = st.columns([1,1,1])
+                    incol1, incol2 = st.columns([1,1])
                     with incol1:
                         if st.button(str(st.session_state.NTE_Quote)+" Approve", key="3"):
                             approvetime = datetime.now()
@@ -1018,7 +1021,6 @@ def mainPage():
                             updateParent(st.session_state.ticketN, 1, st.session_state.NTE_Quote, "1900-01-01 00:00:00.000",  "1900-01-01 00:00:00.000", decline, st.session_state.ticketDf["BranchName"].get(0), "decline")
                             st.success("Successfully updated to declined!")
                             refresh()
-                    incol1, incol2, incol3 = st.columns([1,1,1])            
             category_table_data = []
             for category in categories:
                 table_df = getattr(st.session_state, f"{category.lower().replace(' ', '_').replace('/', '_')}_df")
@@ -1432,6 +1434,48 @@ def main():
                     height: 50px;
                 }
                 </style>
+        <style>
+        .stButton button {
+            float: left;
+        }
+
+        /* Default button styling */
+        .stButton button:first-child {
+            background-color: #0099FF;
+            color: #FFFFFF;
+            width: 120px;
+            height: 50px;
+        }
+
+        .stButton button:hover {
+            background-color: #FFFF00;
+            color: #000000;
+            width: 120px;
+            height: 50px;
+        }
+
+        /* Adjust button size for different DPI settings */
+        @media (min-resolution: 192dpi) {
+            .stButton button:first-child, .stButton button:hover {
+                width: 80px; /* 120px / 1.5 */
+                height: 33.33px; /* 50px / 1.5 */
+            }
+        }
+
+        @media (min-resolution: 144dpi) and (max-resolution: 191dpi) {
+            .stButton button:first-child, .stButton button:hover {
+                width: 96px; /* 120px / 1.25 */
+                height: 40px; /* 50px / 1.25 */
+            }
+        }
+
+        @media (min-resolution: 96dpi) and (max-resolution: 143dpi) {
+            .stButton button:first-child, .stButton button:hover {
+                width: 120px;
+                height: 50px;
+            }
+        }
+        </style>
        """,
         unsafe_allow_html=True,
     )
