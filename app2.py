@@ -443,7 +443,8 @@ def mainPage():
                                                 "Description",
                                                 help="Description",
                                                 width=inwidth/4,
-                                                # options=concatenated_values,
+                # MR- Uncommented the below line,fixes the issue with trip charge work description drop down
+                                                options=concatenated_values,
                                             ),
                                             "UNIT Price": st.column_config.NumberColumn(
                                                 "UNIT Price",
