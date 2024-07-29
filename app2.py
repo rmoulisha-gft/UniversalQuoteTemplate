@@ -443,7 +443,7 @@ def mainPage():
                                                 "Description",
                                                 help="Description",
                                                 width=inwidth/4,
-                                                # options=concatenated_values,
+                                                options=concatenated_values,
                                             ),
                                             "UNIT Price": st.column_config.NumberColumn(
                                                 "UNIT Price",
